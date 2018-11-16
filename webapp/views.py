@@ -13,3 +13,8 @@ def details(request):
 def createOffer(request):
     return render(request, 'webapp/createOffer.html')
     
+def mySmartBlocks(request):
+    return render(request, 'webapp/mySmartBlocks.html')
+    
+def about(request):
+    return render(request, 'webapp/about.html')

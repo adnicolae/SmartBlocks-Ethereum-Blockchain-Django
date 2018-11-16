@@ -8,4 +8,6 @@ urlpatterns = [
     path('offers/', views.offers, name='offers'),
     path('<int:offer_id/details/>', views.details, name='details'),
     path('createOffer/', views.createOffer, name='createOffer'),
+    path('mySmartBlocks/', views.mySmartBlocks, name='mySmartBlocks'),
+    path('about/', views.about, name='about'),
 ]
