@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}My Offers{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">My Offers</h1>
+{% endblock %}
+
+{% block content %}
+{% for offer in my_offers %}
+{{ offer.asset_name }} | {{ offer.price }} {{ offer.currency }}
+{% endfor %}
+{% endblock %}

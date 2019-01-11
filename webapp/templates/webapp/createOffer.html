@@ -1,149 +1,19 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>Create Contract</title>
+{% extends 'base.html' %}
 
-  <!-- CSS  -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="{% static 'webapp/css/materialize.min.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="{% static 'webapp/css/style.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
-</head>
-<body>
-  <nav class="blue-grey lighten-2" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href=".." class="brand-logo">SmartBlocks (w.t.)</a>
-      <ul class="right hide-on-med-and-down">
-      <!-- Dropdown Trigger -->
-      <li><a class='dropdown-trigger' data-target='dropdown1'>Contracts</a></li>
-      <li><a href="../about">About</a></li>
-      <li><a href="../mySmartBlocks">My SmartBlocks</a></li>
-      <!-- Dropdown Structure -->
-      <ul style="min-width:130px;" id='dropdown1' class='dropdown-content'>
-        <li><a href="../offers">View Offers</a></li>
-        <li class="divider" tabindex="-1"></li>
-        <li><a href="">Create Offer</a></li>
-        <li><a href="../myOffers">My Offers</a></li>
-        <li class="divider" tabindex="-1"></li>
-        <li><a href="../orderHistory">Order History</a></li>
-      </ul>          
-      </ul>
+{% block title %}Create Offer{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">Create Offer</h1>
+{% endblock %}
 
-      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-    </div>
-  </nav>
-      <ul class="sidenav" id="nav-mobile">
-      <li class="no-padding">
-      <ul class="collapsible collapsible-accordion">
-        <li class="bold">
-          <a class="collapsible-header" style="padding:0 32px;">Contracts</a>
-          <div class="collapsible-body">
-          <ul>
-            <li><a href="../offers">View Offers</a></li>
-            <li class="divider" tabindex="-1"></li>
-            <li><a href="">Create Offer</a></li>
-            <li><a href="../myOffers">My Offers</a></li>
-            <li class="divider" tabindex="-1"></li>
-            <li><a href="../orderHistory">Order History</a></li>
-          </ul>     
-          </div>
-        </li>
-        </ul>
-      </li>
-      <li class="bold"><a href="../about">About</a></li>
-      <li class="bold"><a href="../mySmartBlocks">My SmartBlocks</a></li>
-
-      </ul>
-  
-    <div class="container">
-    </br></br>
-      <form action="../offers" class="col s12">
-      <div class="row">
-        <label>Contract Type</label>
-            <select class="browser-default" required>
-              <option value="" disabled selected>Choose your option</option>
-              <option value="1">Buy</option>
-              <option value="2">Sell</option>
-            </select>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input id="name" type="text" class="validate" required>
-          <label for="name">Asset name</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col m10 s6">
-          <input id="quantity" type="text" class="validate" required>
-          <label for="quantity">Quantity</label>
-        </div>
-        <div class="input-field col m2 s6">
-          <input id="unit" type="text" class="validate" required>
-          <label for="unit">Unit</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col m10 s6">
-          <input id="price" type="text" class="validate" required>
-          <label for="price">Price</label>
-        </div>
-        <div class="input-field col m2 s6">
-          <input id="currency" type="text" class="validate" required>
-          <label for="currency">Currency</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input disabled id="location" type="text" class="validate" required>
-          <label for="location">Location (using user defualt location)</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input placeholder="Completion date" id="date" class="datepicker" required>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <textarea id="textarea1" class="materialize-textarea">
-          Contract{
-              "type":"sell",
-              "asset":{
-                "name":"steel",
-                "quantity":200,
-                "unit":"kg",
-                "price":3000,
-                "currency":"GBP"},
-              "location":["52°23'00.8", "1°33'36.4"],
-              "enddate":"2018-12-25"
-          }
-          </textarea>
-          <label for="textarea1">
-            Contract
-          </label>
-        </div>
-      </div>
-      <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-        <i class="material-icons right">send</i>
-      </button>
-      </form>
-    </div>
-
-
+{% block content %}
+<form method="post">
   <div class="container">
-
-  </div>
-
-  <footer class="page-footer orange">
-    
-  </footer>
-
-
-   <!--  Scripts-->
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="{% static 'webapp/js/materialize.js'%}"></script>
-  <script src="{% static 'webapp/js/init.js'%}"></script>
-
-  </body>
-</html>
+{% csrf_token %}
+{{ form }}
+    <center>
+   <button class="btn waves-effect waves-light" type="submit">Create Offer
+    <i class="material-icons right">send</i>
+  </button>
+</div>
+</form>
+{% endblock %}

@@ -1,64 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>SmartBlocks</title>
+{% extends 'base.html' %}
 
-  <!-- CSS  -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="{% static 'webapp/css/materialize.min.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="{% static 'webapp/css/style.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
-</head>
-<body>
-  <nav class="blue-grey lighten-2" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="" class="brand-logo">SmartBlocks (w.t.)</a>
-      <ul class="right hide-on-med-and-down">
-      <!-- Dropdown Trigger -->
-      <li><a class='dropdown-trigger' data-target='dropdown1'>Contracts</a></li>
-      <li><a href="about">About</a></li>
-      <li><a href="mySmartBlocks">My SmartBlocks</a></li>
-      <!-- Dropdown Structure -->
-      <ul style="min-width:130px;" id='dropdown1' class='dropdown-content'>
-        <li><a href="offers">View Offers</a></li>
-        <li class="divider" tabindex="-1"></li>
-        <li><a href="createOffer">Create Offer</a></li>
-        <li><a href="myOffers">My Offers</a></li>
-        <li class="divider" tabindex="-1"></li>
-        <li><a href="orderHistory">Order History</a></li>
-      </ul>          
-      </ul>
-
-      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-    </div>
-  </nav>
-      <ul class="sidenav" id="nav-mobile">
-      <li class="no-padding">
-      <ul class="collapsible collapsible-accordion">
-        <li class="bold">
-          <a class="collapsible-header" style="padding:0 32px;">Contracts</a>
-          <div class="collapsible-body">
-          <ul>
-            <li><a href="offers">View Offers</a></li>
-            <li class="divider" tabindex="-1"></li>
-            <li><a href="createOffer">Create Offer</a></li>
-            <li><a href="myOffers">My Offers</a></li>
-            <li class="divider" tabindex="-1"></li>
-            <li><a href="orderHistory">Order History</a></li>
-          </ul>     
-          </div>
-        </li>
-        </ul>
-      </li>
-      <li class="bold"><a href="about">About</a></li>
-      <li class="bold"><a href="mySmartBlocks">My SmartBlocks</a></li>
-
-      </ul>
-  
-  <div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-      <br><br>
+{% block title %}
+SmartBlocks
+{% endblock %}
+{% block header %}
       <h1 class="header center blue-text">SmartBlocks</h1>
       <div class="row center">
         <h5 class="header col s12 light">Supply Chain Management made easy</h5>
@@ -66,25 +11,8 @@
       <div class="row center">
         <a href="offers" id="download-button" class="btn-large waves-effect waves-light blue">Get Started</a>
       </div>
-      <br><br>
+{% endblock %}
 
-    </div>
-  </div>
+{% block content %}
+{% endblock %}
 
-
-  <div class="container">
-
-  </div>
-
-  <footer class="page-footer blue-grey lighten-2">
-    
-  </footer>
-
-
-  <!--  Scripts-->
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="{% static 'webapp/js/materialize.js'%}"></script>
-  <script src="{% static 'webapp/js/init.js'%}"></script>
-
-  </body>
-</html>
