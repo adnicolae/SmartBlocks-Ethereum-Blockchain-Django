@@ -19,12 +19,17 @@
       <li><a class='dropdown-trigger' data-target='dropdown1'>Contracts</a></li>
       <li><a href="{% url 'webapp:about' %}">About</a></li>
       <li><a href="{% url 'webapp:mySmartBlocks' %}">My SmartBlocks</a></li>
+      {% if user.is_authenticated %}
+      <li>Logged in as {{ request.user }}</li>
+      {% else %}
+      </li>Not logged in</li>
+      {% endif %}
       <!-- Dropdown Structure -->
       <ul style="min-width:130px;" id='dropdown1' class='dropdown-content'>
         <li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
         <li class="divider" tabindex="-1"></li>
         <li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
-        <li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
+        <li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
       </ul>          
       </ul>
 
@@ -49,7 +54,11 @@
       </li>
       <li class="bold"><a href="{% url 'webapp:about' %}">About</a></li>
       <li class="bold"><a href="{% url 'webapp:mySmartBlocks' %}">My SmartBlocks</a></li>
-
+      {% if user.is_authenticated %}
+      <li>Logged in as {{ request.user }}</li>
+      {% else %}
+      </li>Not logged in</li>
+      {% endif %}
       </ul>
       
         

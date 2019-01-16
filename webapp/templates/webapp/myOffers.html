@@ -6,7 +6,21 @@
 {% endblock %}
 
 {% block content %}
-{% for offer in my_offers %}
-{{ offer.asset_name }} | {{ offer.price }} {{ offer.currency }}
+<h3>Offers to buy:</h3><br>
+{% if buy_offers.first is not None %}
+{% for offer in buy_offers %}
+{{ offer.asset_name }} | {{ offer.quantity }} {{ offer.unit }} | {{ offer.price }} {{ offer.currency }} | Seller: {{offer.seller}} 
 {% endfor %}
+{% else %}
+There are no buy offers at this time.
+{% endif %}
+<br>
+<h3>Offers to sell:</h3><br>
+{% if sell_offers.first is not None %}
+{% for offer in sell_offers %}
+{{ offer.asset_name }} | {{ offer.quantity }} {{ offer.unit }} | {{ offer.price }} {{ offer.currency }} | Buyer: {{offer.buyer}} 
+{% endfor %}
+{% else %}
+There are no sell offers at this time.
+{% endif %}
 {% endblock %}

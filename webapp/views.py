@@ -13,12 +13,33 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     return render(request, 'webapp/index.html')
     
+@login_required
 def offers(request):
-    all_offers = Offer.objects.all()
-    return render(request, 'webapp/offers.html', {'all_offers':all_offers})
+    buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
+    sell_offers = Offer.objects.filter(buyer=None).exclude(buyer=request.user)
+    return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
     
-def details(request):
-    return render(request, 'webapp/details.html')
+@login_required
+def details(request, offer_id):
+    offer = Offer.objects.get(pk=offer_id)
+    if(offer is None):
+        return redirect('webapp:offers')
+    return render(request, 'webapp/details.html', {'offer':offer})
+    
+@login_required
+def sign(request, offer_id):
+    offer = Offer.objects.get(pk=offer_id)
+    user = User.objects.get(pk=request.user.id)
+    if(offer is None):
+        return redirect('webapp:offers')
+    print(offer.buyer)
+    print(offer.seller)
+    if(offer.buyer is None):
+        offer.buyer = user
+    elif(offer.seller is None):
+        offer.seller = user
+    offer.save()
+    return redirect('webapp:myOffers')
     
 def login_view(request):
     form = UserForm(request.POST)
@@ -58,8 +79,9 @@ def createOffer(request):
 @login_required
 def myOffers(request):
     user = request.user
-    my_offers = [Offer.objects.get(Q(buyer=user) | Q(seller=user))]
-    return render(request, 'webapp/myOffers.html', {'my_offers':my_offers})
+    buy_offers = Offer.objects.filter(seller=user)
+    sell_offers = Offer.objects.filter(buyer=user)
+    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
 
 @login_required
 def mySmartBlocks(request):
