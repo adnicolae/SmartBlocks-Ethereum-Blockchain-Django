@@ -16,7 +16,7 @@ def index(request):
 @login_required
 def offers(request):
     buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
-    sell_offers = Offer.objects.filter(buyer=None).exclude(buyer=request.user)
+    sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
     return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
     
 @login_required
@@ -32,8 +32,6 @@ def sign(request, offer_id):
     user = User.objects.get(pk=request.user.id)
     if(offer is None):
         return redirect('webapp:offers')
-    print(offer.buyer)
-    print(offer.seller)
     if(offer.buyer is None):
         offer.buyer = user
     elif(offer.seller is None):
@@ -79,8 +77,8 @@ def createOffer(request):
 @login_required
 def myOffers(request):
     user = request.user
-    buy_offers = Offer.objects.filter(seller=user)
-    sell_offers = Offer.objects.filter(buyer=user)
+    buy_offers = Offer.objects.filter(buyer=user)
+    sell_offers = Offer.objects.filter(seller=user)
     return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
 
 @login_required
