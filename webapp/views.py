@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.forms import ModelForm
 from webapp.models import UserForm,OfferCreationForm,SignupForm,Offer
 from webapp.backend import MyBackend
-from django.contrib import auth
+from django.contrib import auth, messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 
 from django.db.models import Q
 
@@ -98,3 +100,20 @@ def register(request):
         auth.login(request, user)
         return redirect('webapp:mySmartBlocks')        
     return render(request, 'webapp/register.html', {'form': form})
+	
+@login_required
+def changePassword(request):
+	form = PasswordChangeForm(request.user,request.POST)
+	if form.is_valid():
+		user = form.save()
+		update_session_auth_hash(request,user)
+		messages.success(request,'Your password was updated')
+		return redirect('webapp:accountSetting')
+	else:
+		messages.error(request,'Error')
+	
+	return render(request, 'webapp/changePassword.html',{'form':form})
+	
+@login_required
+def accountSetting(request):
+	return render(request, 'webapp/accountSetting.html')

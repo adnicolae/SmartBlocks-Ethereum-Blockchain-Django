@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Setting{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">Account Setting</h1>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'webapp:changePassword' %}">Change Password</a>
+{% endblock %}
