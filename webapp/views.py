@@ -12,6 +12,8 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth.decorators import login_required
 
+from .forms import ChangeUsernameForm
+
 def index(request):
     return render(request, 'webapp/index.html')
     
@@ -103,17 +105,40 @@ def register(request):
 	
 @login_required
 def changePassword(request):
-	form = PasswordChangeForm(request.user,request.POST)
-	if form.is_valid():
-		user = form.save()
-		update_session_auth_hash(request,user)
-		messages.success(request,'Your password was updated')
-		return redirect('webapp:accountSetting')
-	else:
-		messages.error(request,'Error')
 	
+	if request.method == 'POST':
+		form = PasswordChangeForm(request.user,request.POST)
+		if form.is_valid():
+			user = form.save()
+			update_session_auth_hash(request,user)
+			messages.success(request,'Your password was updated')
+			return redirect('webapp:accountSetting')
+		else:
+			messages.error(request,'Error')
+	else:
+		form = PasswordChangeForm(request.user)
 	return render(request, 'webapp/changePassword.html',{'form':form})
 	
+@login_required
+def changeUsername(request):
+	if request.method == 'POST':
+		form = ChangeUsernameForm(request.POST)
+		if form.is_valid():
+			passw = form.cleaned_data['password']
+			user = request.user
+			if user.check_password(passw):
+				newusername = form.cleaned_data['newusername']
+				user.username = newusername
+				user.save()
+				return redirect('webapp:accountSetting')
+			else:
+				messages.error(request,'Wrong Password')
+		else:
+			messages.error(request,'Error')
+	else:
+		form = ChangeUsernameForm()
+	return render(request,'webapp/changeUsername.html',{'form':form})
+
 @login_required
 def accountSetting(request):
 	return render(request, 'webapp/accountSetting.html')
