@@ -14,6 +14,9 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import ChangeUsernameForm
 
+from django.forms.models import model_to_dict
+
+
 def index(request):
     return render(request, 'webapp/index.html')
     
@@ -78,6 +81,17 @@ def createOffer(request):
         return redirect('webapp:myOffers')
     return render(request, 'webapp/createOffer.html', {'form': form})
 
+def changeOffer(request, offer_id):
+	offer = Offer.objects.get(pk=offer_id)
+	if request.method == 'POST':
+		user = User.objects.get(pk=request.user.id)
+		form = OfferCreationForm(request.POST,instance=offer)
+		if form.is_valid():
+			offer = form.save()
+	else:
+		form = OfferCreationForm(instance=offer)
+	return render(request, 'webapp/changeOffer.html',{'form':form})
+	
 @login_required
 def myOffers(request):
     user = request.user

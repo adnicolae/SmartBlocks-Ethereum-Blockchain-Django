@@ -17,5 +17,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout_view'),
 	path('accountSetting/', views.accountSetting, name='accountSetting'),
 	path('changePassword/', views.changePassword, name='changePassword'),
-	path('changeUsername/', views.changeUsername, name='changeUsername')
+	path('changeUsername/', views.changeUsername, name='changeUsername'),
+	path('changeOffer/<int:offer_id>', views.changeOffer, name='changeOffer')
 ]
