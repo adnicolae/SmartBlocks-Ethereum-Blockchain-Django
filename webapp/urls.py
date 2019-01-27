@@ -18,5 +18,6 @@ urlpatterns = [
 	path('accountSetting/', views.accountSetting, name='accountSetting'),
 	path('changePassword/', views.changePassword, name='changePassword'),
 	path('changeUsername/', views.changeUsername, name='changeUsername'),
-	path('changeOffer/<int:offer_id>', views.changeOffer, name='changeOffer')
+	path('changeOffer/<int:offer_id>', views.changeOffer, name='changeOffer'),
+	path('searchOffer/', views.searchOffer, name='searchOffer')
 ]

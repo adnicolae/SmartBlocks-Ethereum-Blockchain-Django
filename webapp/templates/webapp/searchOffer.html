@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Username{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">Search Offer</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+  <div class="container">
+{% csrf_token %}
+{{form}}
+    <center>
+   <button class="btn waves-effect waves-light" type="submit">Search
+    <i class="material-icons right">send</i>
+  </button>
+  </center>
+ </div>
+</form><br>
+{% if sortedoffers %}
+<table style="width:100%">
+<tr>
+<th>Name</th>
+<th>Quantity</th>
+<th>Price </th>
+<th>Type</th>
+<th>Buyer</th>
+<th>Seller</th>
+</tr>
+{% for offer in sortedoffers %}
+	<tr>
+	<td>{{ offer.asset_name }} </td> 
+	<td>{{ offer.quantity }}{{ offer.unit }} </td> 
+	<td>{{ offer.price }}{{ offer.currency }} </td> 
+	<td>{{offer.contract_type}}</td> 
+	<td>{{offer.buyer}}</td> 
+	<td>{{offer.seller}}</td> 
+	</tr>
+{% endfor %}
+</table>
+{% else %}
+{% endif %}
+{% endblock %}

@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth.decorators import login_required
 
-from .forms import ChangeUsernameForm
+from .forms import ChangeUsernameForm, SearchOfferForm
 
 from django.forms.models import model_to_dict
 
@@ -98,7 +98,54 @@ def myOffers(request):
     buy_offers = Offer.objects.filter(buyer=user)
     sell_offers = Offer.objects.filter(seller=user)
     return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
+@login_required
+def matchOffer(request, offer_id):
+	user = request.user
+	
+	myoffer = Offer.objects.get(pk=offer_id)
+	#print(myoffer.contract_type)
+	#TODO prevent buying your own stuff
+	if myoffer.contract_type == 'Buy':
+		offers = Offer.objects.filter(contract_type='Sell',asset_name=myoffer.asset_name)
+	else:
+		offers = Offer.objects.filter(contract_type='Buy',asset_name=myoffer.asset_name)
+	sortedoffers = sorted(offers,key = lambda x: min(myoffer.quantity,x.quantity)/max(myoffer.quantity,x.quantity) + min(myoffer.price/myoffer.quantity,x.price/x.quantity)/max(myoffer.price/myoffer.quantity,x.price/x.quantity),reverse = True)[:10]
+	return render(request,'webapp/matchOffer.html',{'sortedoffers':sortedoffers,'myoffer':myoffer})
 
+def searchOffer(request):
+	if request.POST.get('offer_id'):
+		offer_id = request.POST.get('offer_id')
+		myoffer = Offer.objects.get(pk=offer_id)
+		form = SearchOfferForm({'asset_name':myoffer.asset_name,'quantity':myoffer.quantity,'price':myoffer.price,'contract_type':myoffer.contract_type})
+		name = myoffer.asset_name
+		quantity = myoffer.quantity
+		price = myoffer.price
+		contract_type = myoffer.contract_type	
+		if contract_type == 'Buy':
+			offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
+		else:
+			offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
+		sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]	
+	elif request.method == 'POST':
+		form = SearchOfferForm(request.POST)
+		
+		if form.is_valid():
+			#print('hi')
+			name = form.cleaned_data['asset_name']
+			quantity = form.cleaned_data['quantity']
+			price = form.cleaned_data['price']
+			contract_type = form.cleaned_data['contract_type']
+			if contract_type == 'Buy':
+				offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
+			else:
+				offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
+			sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]	
+		else:
+			sortedoffers = None
+	else:
+		form = SearchOfferForm()
+		sortedoffers = None
+	return render(request,'webapp/searchOffer.html',{'form':form,'sortedoffers':sortedoffers})
 @login_required
 def mySmartBlocks(request):
     return render(request, 'webapp/mySmartBlocks.html')
