@@ -2,6 +2,11 @@
     color: red;
 }
 
-.helptext {
-    display: none;
+.keyword {
+    color: blue;
+    font-weight: bold;
+}
+
+.variable {
+    color:red;
 }

@@ -15,6 +15,9 @@ class Offer(models.Model):
     unit = models.CharField(max_length=10)
     price = models.DecimalField(default=0, max_digits=30, decimal_places=10)
     
+    condition_help = "Keywords: <span class='keyword'>AND</span>, <span class='keyword'>OR</span>.</br>Operations: <, >, =</br>Variables: <span class='variable'>price</span>, <span class='variable'>quantity</span></br>Use parentheses to group statements.</br></br>Example:</br> (<span class='variable'>price</span> < 100 <span class='keyword'>AND</span> (<span class='variable'>quantity</span> > 20 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 50)) </br><span class='keyword'>OR</span> (<span class='variable'>price</span> < 120 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 20)"
+    completion_condition = models.CharField(max_length=256, help_text=condition_help,blank=True)
+    
     GBP = 'GBP'
     USD = 'USD'
     BTC = 'BTC'
@@ -46,5 +49,5 @@ class SignupForm(UserCreationForm):
 class OfferCreationForm(ModelForm):
     class Meta:
         model = Offer
-        fields = ['contract_type', 'asset_name', 'quantity', 'unit', 'price', 'currency', 'completion_date']
+        fields = ['contract_type', 'asset_name', 'quantity', 'unit', 'price', 'completion_condition', 'currency', 'completion_date']
         

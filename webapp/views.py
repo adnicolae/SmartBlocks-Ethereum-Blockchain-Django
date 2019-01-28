@@ -47,7 +47,7 @@ def sign(request, offer_id):
     return redirect('webapp:myOffers')
     
 def login_view(request):
-    form = UserForm(request.POST)
+    form = UserForm()
     if form.is_valid():
         username=form.cleaned_data.get('email')
         password=form.cleaned_data.get('password')
@@ -65,7 +65,7 @@ def logout_view(request):
     
 @login_required   
 def createOffer(request):
-    form = OfferCreationForm(request.POST)
+    form = OfferCreationForm()
     if form.is_valid():
         offer = form.save(commit=False)
         user = User.objects.get(id=request.user.id)

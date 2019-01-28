@@ -9,7 +9,15 @@
 <form method="post">
   <div class="container">
 {% csrf_token %}
-{{ form }}
+{% for field in form %}
+    <div class="fieldWrapper">  
+        {{field.errors}}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+        {{ field.label_tag }} {{ field }}
+    </div>
+{% endfor %}
     <center>
    <button class="btn waves-effect waves-light" type="submit">Create Offer
     <i class="material-icons right">send</i>
