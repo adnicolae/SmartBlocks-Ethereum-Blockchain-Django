@@ -69,8 +69,8 @@ def createOffer(request):
     if form.is_valid():
         offer = form.save(commit=False)
         user = User.objects.get(id=request.user.id)
-        
-        if form.cleaned_data.get('contract_type') is 'SELL' :
+
+        if form.cleaned_data.get('contract_type') == 'Sell' :
             offer.seller = user
         else:
             offer.buyer = user
