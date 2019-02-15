@@ -16,6 +16,8 @@ from .forms import ChangeUsernameForm, SearchOfferForm
 
 from django.forms.models import model_to_dict
 
+from .matcher import checkMatch
+
 
 def index(request):
     return render(request, 'webapp/index.html')
@@ -47,7 +49,7 @@ def sign(request, offer_id):
     return redirect('webapp:myOffers')
     
 def login_view(request):
-    form = UserForm()
+    form = UserForm(request.POST)
     if form.is_valid():
         username=form.cleaned_data.get('email')
         password=form.cleaned_data.get('password')
@@ -65,17 +67,35 @@ def logout_view(request):
     
 @login_required   
 def createOffer(request):
-    form = OfferCreationForm()
+    form = OfferCreationForm(request.POST)
     if form.is_valid():
         offer = form.save(commit=False)
         user = User.objects.get(id=request.user.id)
 
         if form.cleaned_data.get('contract_type') == 'Sell' :
             offer.seller = user
+            priority = 'seller'
         else:
             offer.buyer = user
+            priority = 'buyer'
         
         offer.location = 'CV47AL'
+        
+        #try to find match        
+        if form.cleaned_data.get('contract_type') == 'Buy':
+            potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
+        else:
+            potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
+        
+        for m in potential_matches:
+            if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
+                offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
+                if priority == 'buyer':
+                    offer.seller = m.seller
+                else:
+                    offer.buyer = m.buyer
+                break
+                
         offer.save()
         
         return redirect('webapp:myOffers')
@@ -95,9 +115,11 @@ def changeOffer(request, offer_id):
 @login_required
 def myOffers(request):
     user = request.user
-    buy_offers = Offer.objects.filter(buyer=user)
-    sell_offers = Offer.objects.filter(seller=user)
-    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
+    buy_offers = Offer.objects.filter(buyer=user,seller=None)
+    sell_offers = Offer.objects.filter(seller=user,buyer=None)
+    completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
+    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
+    
 @login_required
 def matchOffer(request, offer_id):
 	user = request.user

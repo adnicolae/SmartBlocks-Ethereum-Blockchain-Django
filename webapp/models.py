@@ -11,18 +11,17 @@ class Offer(models.Model):
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="b",null=True)
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="s", null=True)
     asset_name = models.CharField(max_length=100)
-    quantity = models.DecimalField(default=0, max_digits=20,decimal_places=4)
-    unit = models.CharField(max_length=10)
-    price = models.DecimalField(default=0, max_digits=30, decimal_places=10)
-    
     condition_help = "Keywords: <span class='keyword'>AND</span>, <span class='keyword'>OR</span>.</br>Operations: <, >, =</br>Variables: <span class='variable'>price</span>, <span class='variable'>quantity</span></br>Use parentheses to group statements.</br></br>Example:</br> (<span class='variable'>price</span> < 100 <span class='keyword'>AND</span> (<span class='variable'>quantity</span> > 20 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 50)) </br><span class='keyword'>OR</span> (<span class='variable'>price</span> < 120 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 20)"
-    completion_condition = models.CharField(max_length=256, help_text=condition_help,blank=True)
-    
+    completion_condition = models.CharField(max_length=256, help_text=condition_help)
+    unit = models.CharField(max_length=10)    
     GBP = 'GBP'
     USD = 'USD'
     BTC = 'BTC'
     CURRENCY_CHOICES = ((GBP, 'GBP'), (USD, 'USD'), (BTC, 'BTC'))
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default=GBP)
+    
+    quantity = models.DecimalField(default=0, max_digits=20,decimal_places=4)
+    price = models.DecimalField(default=0, max_digits=30, decimal_places=10)
     
     BUY = 'Buy'
     SELL = 'Sell'
@@ -31,7 +30,7 @@ class Offer(models.Model):
     
     location = models.CharField(max_length=8)
     completion_date = models.DateField()
-    contract = models.TextField()
+    
    
 class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -49,5 +48,5 @@ class SignupForm(UserCreationForm):
 class OfferCreationForm(ModelForm):
     class Meta:
         model = Offer
-        fields = ['contract_type', 'asset_name', 'quantity', 'unit', 'price', 'completion_condition', 'currency', 'completion_date']
+        fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency', 'completion_date']
         
