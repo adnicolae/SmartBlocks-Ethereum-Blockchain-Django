@@ -31,6 +31,9 @@ class Offer(models.Model):
     location = models.CharField(max_length=8)
     completion_date = models.DateField()
     
+    def write(self):
+        return '{' + '"buyer" : "{}", "seller" : "{}", "asset_name" : "{}", "unit" : "{}", "currency" : "{}", "quantity" : "{}", "price" : "{}"'.format(self.buyer, self.seller, self.asset_name, self.unit, self.currency, self.quantity, self.price) + '}'
+    
    
 class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)

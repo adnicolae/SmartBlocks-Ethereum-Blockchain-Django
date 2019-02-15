@@ -18,6 +18,8 @@ from django.forms.models import model_to_dict
 
 from .matcher import checkMatch
 
+import json
+
 
 def index(request):
     return render(request, 'webapp/index.html')
@@ -89,15 +91,22 @@ def createOffer(request):
         
         for m in potential_matches:
             if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
+                #match found, calculate price and quantity to trade at
                 offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
                 if priority == 'buyer':
                     offer.seller = m.seller
                 else:
                     offer.buyer = m.buyer
+                
+                #creates json serialisation to send to blockchain
+                d = json.loads(offer.write())
+                # e.g. blockchain.add(d) goes here
+                #will also need to add this to 
+                
                 break
                 
         offer.save()
-        
+       
         return redirect('webapp:myOffers')
     return render(request, 'webapp/createOffer.html', {'form': form})
 
