@@ -33,6 +33,7 @@ You have no active sell offers.
 {% if completed_offers.first is not None %}
 {% for offer in completed_offers %}
 {{ offer.asset_name }} | {{ offer.quantity }} {{ offer.unit }} | {{ offer.price }} {{ offer.currency }} | Buyer: {{offer.buyer}} | Seller: {{offer.seller}}
+<br>
 {% endfor %}
 {% else %}
 You have no completed offers.
