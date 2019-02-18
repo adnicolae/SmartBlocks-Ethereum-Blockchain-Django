@@ -18,6 +18,15 @@ from django.forms.models import model_to_dict
 
 from .matcher import checkMatch
 
+from twisted.internet.protocol import Factory, Protocol, ServerFactory, ClientFactory
+from twisted.protocols.basic import LineReceiver
+from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
+from twisted.internet import reactor
+
+class SendBlockchainProtocol(Protocol):
+    def sendContract(self, data):
+        self.transport.write(data)
+
 
 def index(request):
     return render(request, 'webapp/index.html')
