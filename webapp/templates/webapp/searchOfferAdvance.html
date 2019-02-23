@@ -2,11 +2,11 @@
 
 {% block title %}Search Username{% endblock %}
 {% block header %}
-      <h1 class="header center blue-text">Simple Search Offer</h1>
+      <h1 class="header center blue-text">Advance Search Offer</h1>
 {% endblock %}
 
 {% block content %}
-<a href ="{% url 'webapp:searchOfferAdvance' %}" class="waves-effect waves-light btn">Switch Search Mode</a>
+<a href ="{% url 'webapp:searchOffer' %}" class="waves-effect waves-light btn">Switch Search Mode</a>
 <form method="post">
   <div class="container">
 {% csrf_token %}

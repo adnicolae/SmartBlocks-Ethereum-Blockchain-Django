@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth.decorators import login_required
 
-from .forms import ChangeUsernameForm, SearchOfferForm
+from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
@@ -168,39 +168,68 @@ def matchOffer(request, offer_id):
 	return render(request,'webapp/matchOffer.html',{'sortedoffers':sortedoffers,'myoffer':myoffer})
 
 def searchOffer(request):
-	if request.POST.get('offer_id'):
-		offer_id = request.POST.get('offer_id')
-		myoffer = Offer.objects.get(pk=offer_id)
-		form = SearchOfferForm({'asset_name':myoffer.asset_name,'quantity':myoffer.quantity,'price':myoffer.price,'contract_type':myoffer.contract_type})
-		name = myoffer.asset_name
-		quantity = myoffer.quantity
-		price = myoffer.price
-		contract_type = myoffer.contract_type
-		if contract_type == 'Buy':
-			offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
-		else:
-			offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
-		sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]
-	elif request.method == 'POST':
+	if request.method == 'POST':
 		form = SearchOfferForm(request.POST)
-
 		if form.is_valid():
-			#print('hi')
 			name = form.cleaned_data['asset_name']
 			quantity = form.cleaned_data['quantity']
 			price = form.cleaned_data['price']
 			contract_type = form.cleaned_data['contract_type']
+			offers = []
 			if contract_type == 'Buy':
-				offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
 			else:
-				offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
-			sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]
+				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+			
+			searchCondition = "p ="+ str(price) + "AND q =" + str(quantity)
+			for m in potential_matches:
+				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+					offers.append(m)
+					
+			# If not offers found
+			if not offers:
+				noMatch = 1
+			else:
+				noMatch = 0
 		else:
-			sortedoffers = None
+			offers = None
+			print("invalid form")
 	else:
 		form = SearchOfferForm()
-		sortedoffers = None
-	return render(request,'webapp/searchOffer.html',{'form':form,'sortedoffers':sortedoffers})
+		offers = None
+		noMatch = 0
+	return render(request,'webapp/searchOffer.html',{'form':form,'offers':offers,'noMatch':noMatch})
+	
+def searchOfferAdvance(request):
+	if request.method == 'POST':
+		form = SearchOfferFormAdvance(request.POST)
+		if form.is_valid():
+			name = form.cleaned_data['asset_name']
+			contract_type = form.cleaned_data['contract_type']
+			offers = []
+			if contract_type == 'Buy':
+				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+			else:
+				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+			
+			searchCondition = form.cleaned_data['completion_condition']
+			for m in potential_matches:
+				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+					offers.append(m)
+					
+			# If not offers found
+			if not offers:
+				noMatch = 1
+			else:
+				noMatch = 0
+		else:
+			offers = None
+			print("invalid form")
+	else:
+		form = SearchOfferFormAdvance()
+		offers = None
+		noMatch = 0
+	return render(request,'webapp/searchOfferAdvance.html',{'form':form,'offers':offers,'noMatch':noMatch})
 @login_required
 def mySmartBlocks(request):
     return render(request, 'webapp/mySmartBlocks.html')

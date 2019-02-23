@@ -19,5 +19,6 @@ urlpatterns = [
 	path('changePassword/', views.changePassword, name='changePassword'),
 	path('changeUsername/', views.changeUsername, name='changeUsername'),
 	path('changeOffer/<int:offer_id>', views.changeOffer, name='changeOffer'),
-	path('searchOffer/', views.searchOffer, name='searchOffer')
+	path('searchOffer/', views.searchOffer, name='searchOffer'),
+	path('searchOfferAdvance/', views.searchOfferAdvance, name='searchOfferAdvance')
 ]
