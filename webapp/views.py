@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth.decorators import login_required
 
-from .forms import ChangeUsernameForm, SearchOfferForm
+from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
@@ -20,23 +20,39 @@ from .matcher import checkMatch
 
 import json
 
+from twisted.internet.protocol import Factory, Protocol, ServerFactory, ClientFactory
+from twisted.protocols.basic import LineReceiver
+from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
+from twisted.internet import reactor, defer
+
+class SendBlockchainProtocol(Protocol):
+
+    def sendContract(self, data):
+        d = defer.Deferred()
+        self.transport.write(data)
+        return d
+
+def sendJSON(p, data):
+    d = p.sendContract(str.encode(data + '\r\n'))
+    d.addCallback(lambda stop: reactor.stop())
+
 
 def index(request):
     return render(request, 'webapp/index.html')
-    
+
 @login_required
 def offers(request):
     buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
     sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
     return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
-    
+
 @login_required
 def details(request, offer_id):
     offer = Offer.objects.get(pk=offer_id)
     if(offer is None):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
-    
+
 @login_required
 def sign(request, offer_id):
     offer = Offer.objects.get(pk=offer_id)
@@ -49,7 +65,7 @@ def sign(request, offer_id):
         offer.seller = user
     offer.save()
     return redirect('webapp:myOffers')
-    
+
 def login_view(request):
     form = UserForm(request.POST)
     if form.is_valid():
@@ -62,12 +78,12 @@ def login_view(request):
         else:
             form = UserForm()
     return render(request, 'webapp/login.html', {'form': form})
-   
+
 def logout_view(request):
     auth.logout(request)
     return redirect('webapp:index')
-    
-@login_required   
+
+@login_required
 def createOffer(request):
     form = OfferCreationForm(request.POST)
     if form.is_valid():
@@ -80,15 +96,23 @@ def createOffer(request):
         else:
             offer.buyer = user
             priority = 'buyer'
-        
+
         offer.location = 'CV47AL'
-        
-        #try to find match        
+
+        # contract sent to blockchain server
+        # must run server.py to test
+        jsonContract = offer.write()
+        endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
+        connection = connectProtocol(endpoint, SendBlockchainProtocol())
+        connection.addCallback(sendJSON, jsonContract)
+        reactor.run(installSignalHandlers=0)
+
+        #try to find match
         if form.cleaned_data.get('contract_type') == 'Buy':
             potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
         else:
             potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
-        
+
         for m in potential_matches:
             if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
                 #match found, calculate price and quantity to trade at
@@ -97,16 +121,16 @@ def createOffer(request):
                     offer.seller = m.seller
                 else:
                     offer.buyer = m.buyer
-                
+
                 #creates json serialisation to send to blockchain
                 d = json.loads(offer.write())
                 # e.g. blockchain.add(d) goes here
-                #will also need to add this to 
-                
+                #will also need to add this to
+
                 break
-                
+
         offer.save()
-       
+
         return redirect('webapp:myOffers')
     return render(request, 'webapp/createOffer.html', {'form': form})
 
@@ -120,7 +144,7 @@ def changeOffer(request, offer_id):
 	else:
 		form = OfferCreationForm(instance=offer)
 	return render(request, 'webapp/changeOffer.html',{'form':form})
-	
+
 @login_required
 def myOffers(request):
     user = request.user
@@ -128,11 +152,11 @@ def myOffers(request):
     sell_offers = Offer.objects.filter(seller=user,buyer=None)
     completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
     return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
-    
+
 @login_required
 def matchOffer(request, offer_id):
 	user = request.user
-	
+
 	myoffer = Offer.objects.get(pk=offer_id)
 	#print(myoffer.contract_type)
 	#TODO prevent buying your own stuff
@@ -144,46 +168,75 @@ def matchOffer(request, offer_id):
 	return render(request,'webapp/matchOffer.html',{'sortedoffers':sortedoffers,'myoffer':myoffer})
 
 def searchOffer(request):
-	if request.POST.get('offer_id'):
-		offer_id = request.POST.get('offer_id')
-		myoffer = Offer.objects.get(pk=offer_id)
-		form = SearchOfferForm({'asset_name':myoffer.asset_name,'quantity':myoffer.quantity,'price':myoffer.price,'contract_type':myoffer.contract_type})
-		name = myoffer.asset_name
-		quantity = myoffer.quantity
-		price = myoffer.price
-		contract_type = myoffer.contract_type	
-		if contract_type == 'Buy':
-			offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
-		else:
-			offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
-		sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]	
-	elif request.method == 'POST':
+	if request.method == 'POST':
 		form = SearchOfferForm(request.POST)
-		
 		if form.is_valid():
-			#print('hi')
 			name = form.cleaned_data['asset_name']
 			quantity = form.cleaned_data['quantity']
 			price = form.cleaned_data['price']
 			contract_type = form.cleaned_data['contract_type']
+			offers = []
 			if contract_type == 'Buy':
-				offers = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
 			else:
-				offers = Offer.objects.filter(contract_type='Buy',asset_name=name)
-			sortedoffers = sorted(offers,key = lambda x: min(quantity,x.quantity)/max(quantity,x.quantity) + min(price/quantity,x.price/x.quantity)/max(price/quantity,x.price/x.quantity),reverse = True)[:10]	
+				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+			
+			searchCondition = "p ="+ str(price) + "AND q =" + str(quantity)
+			for m in potential_matches:
+				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+					offers.append(m)
+					
+			# If not offers found
+			if not offers:
+				noMatch = 1
+			else:
+				noMatch = 0
 		else:
-			sortedoffers = None
+			offers = None
+			print("invalid form")
 	else:
 		form = SearchOfferForm()
-		sortedoffers = None
-	return render(request,'webapp/searchOffer.html',{'form':form,'sortedoffers':sortedoffers})
+		offers = None
+		noMatch = 0
+	return render(request,'webapp/searchOffer.html',{'form':form,'offers':offers,'noMatch':noMatch})
+	
+def searchOfferAdvance(request):
+	if request.method == 'POST':
+		form = SearchOfferFormAdvance(request.POST)
+		if form.is_valid():
+			name = form.cleaned_data['asset_name']
+			contract_type = form.cleaned_data['contract_type']
+			offers = []
+			if contract_type == 'Buy':
+				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+			else:
+				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+			
+			searchCondition = form.cleaned_data['completion_condition']
+			for m in potential_matches:
+				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+					offers.append(m)
+					
+			# If not offers found
+			if not offers:
+				noMatch = 1
+			else:
+				noMatch = 0
+		else:
+			offers = None
+			print("invalid form")
+	else:
+		form = SearchOfferFormAdvance()
+		offers = None
+		noMatch = 0
+	return render(request,'webapp/searchOfferAdvance.html',{'form':form,'offers':offers,'noMatch':noMatch})
 @login_required
 def mySmartBlocks(request):
     return render(request, 'webapp/mySmartBlocks.html')
-    
+
 def about(request):
     return render(request, 'webapp/about.html')
-    
+
 def register(request):
     form = SignupForm(request.POST)
     if form.is_valid():
@@ -192,12 +245,12 @@ def register(request):
         raw_password = form.cleaned_data.get('password1')
         user = auth.authenticate(username=user.username, password=raw_password)
         auth.login(request, user)
-        return redirect('webapp:mySmartBlocks')        
+        return redirect('webapp:mySmartBlocks')
     return render(request, 'webapp/register.html', {'form': form})
-	
+
 @login_required
 def changePassword(request):
-	
+
 	if request.method == 'POST':
 		form = PasswordChangeForm(request.user,request.POST)
 		if form.is_valid():
@@ -210,7 +263,7 @@ def changePassword(request):
 	else:
 		form = PasswordChangeForm(request.user)
 	return render(request, 'webapp/changePassword.html',{'form':form})
-	
+
 @login_required
 def changeUsername(request):
 	if request.method == 'POST':
