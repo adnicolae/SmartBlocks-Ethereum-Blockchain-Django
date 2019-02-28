@@ -2,91 +2,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>{% block title %}SmartBlocks{% endblock %}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+	<title>{% block title %}SmartBlocks{% endblock %}</title>
 
-  <!-- CSS  -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="{% static 'webapp/css/materialize.min.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
-  <link href="{% static 'webapp/css/style.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
+	<!-- CSS  -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="{% static 'webapp/css/materialize.min.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
+	<link href="{% static 'webapp/css/style.css' %}" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
 <body>
-  <nav class="light-blue darken-4" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="{% url 'webapp:index' %}" class="brand-logo">SmartBlocks</a>
-      <ul class="right hide-on-med-and-down">
-      <!-- Dropdown Trigger -->
-      <li><a class='dropdown-trigger' data-target='dropdown1'>Contracts</a></li>
+	<nav class="light-blue darken-4" role="navigation">
+	<div class="nav-wrapper container"><a id="logo-container" href="{% url 'webapp:index' %}" class="brand-logo">SmartBlocks</a>
+	<ul class="right hide-on-med-and-down">
+		<!-- Dropdown Trigger -->
+		<li><a class='dropdown-trigger' data-target='dropdown1'>Contracts</a></li>
+		<li><a href="{% url 'webapp:mySmartBlocks' %}">Dashboard</a></li>
+		<li><a href="{% url 'webapp:searchOffer' %}">Search</a></li>
+		{% if user.is_authenticated %}
+		<li>Logged in as {{ request.user }}</li>
+		{% else %}
+		</li>Not logged in</li>
+		{% endif %}
+		<!-- Dropdown Structure -->
+		<ul style="min-width:130px;" id='dropdown1' class='dropdown-content'>
+			<li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
+			<li class="divider" tabindex="-1"></li>
+			<li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
+			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
+		</ul>          
+	</ul>
 
-      <li><a href="{% url 'webapp:mySmartBlocks' %}">Dashboard</a></li>
-      {% if user.is_authenticated %}
-      <li>Logged in as {{ request.user }}</li>
-      {% else %}
-      </li>Not logged in</li>
-      {% endif %}
-      <!-- Dropdown Structure -->
-      <ul style="min-width:130px;" id='dropdown1' class='dropdown-content'>
-        <li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
-        <li class="divider" tabindex="-1"></li>
-        <li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
-        <li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
-      </ul>          
-      </ul>
-
-      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-    </div>
-  </nav>
-      <ul class="sidenav " id="nav-mobile">
-      <li class="no-padding">
-      <ul class="collapsible collapsible-accordion">
-        <li class="bold">
-          <a class="collapsible-header" style="padding:0 32px;">Contracts</a>
-          <div class="collapsible-body">
-          <ul>
-            <li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
-            <li class="divider" tabindex="-1"></li>
-            <li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
-            <li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
-			<li><a href="{% url 'webapp:searchOffer' %}">Search for Offers</a></li>
-          </ul>     
-          </div>
-        </li>
-        </ul>
-      </li>
-      <li class="bold"><a href="{% url 'webapp:mySmartBlocks' %}">Dashboard</a></li>
-      {% if user.is_authenticated %}
-      <li>Logged in as {{ request.user }}</li>
-      {% else %}
-      </li>Not logged in</li>
-      {% endif %}
-      </ul>
-      
-        
-  <div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-    <br><br>
-       {% block header %}
-      {% endblock %}
-      <br><br>
-    </div>
-  </div>
-      
+	<a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+	</div>
+	</nav>
+	<ul class="sidenav " id="nav-mobile">
+		<li class="no-padding">
+			<ul class="collapsible collapsible-accordion">
+				<li class="bold">
+					<a class="collapsible-header" style="padding:0 32px;">Contracts</a>
+					<div class="collapsible-body">
+						<ul>
+							<li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
+							<li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
+							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
+							<li><a href="{% url 'webapp:searchOffer' %}">Search for Offers</a></li>
+							<li class="divider" tabindex="-1"></li>
+						</ul>     
+					</div>
+				</li>
+			</ul>
+		</li>
+		<li class="bold"><a href="{% url 'webapp:mySmartBlocks' %}">Dashboard</a></li>
+		{% if user.is_authenticated %}
+		<li>Logged in as {{ request.user }}</li>
+		{% else %}
+		</li>Not logged in</li>
+		{% endif %}
+	</ul>
 
 
-  <div class="container content">
-      {% block content %}
-      {% endblock %}
-  </div>
+	<div class="section no-pad-bot" id="index-banner">
+		<div class="container">
+			<br><br>
+			{% block header %}
+			{% endblock %}
+			<br><br>
+		</div>
+	</div>
 
-  <footer class="page-footer light-blue darken-4">
-    
-  </footer>
+	<!--  Scripts-->
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="{% static 'webapp/js/materialize.js'%}"></script>
+	<script src="{% static 'webapp/js/init.js'%}"></script>
 
+	<div class="container content">
+		{% block content %}
+		{% endblock %}
+	</div>
 
-  <!--  Scripts-->
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="{% static 'webapp/js/materialize.js'%}"></script>
-  <script src="{% static 'webapp/js/init.js'%}"></script>
+	<footer class="page-footer light-blue darken-4">
 
-  </body>
+	</footer>
+</body>
 </html>

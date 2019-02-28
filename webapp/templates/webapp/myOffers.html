@@ -6,36 +6,86 @@
 {% endblock %}
 
 {% block content %}
-<h3>Offers to buy:</h3><br>
-{% if buy_offers.first is not None %}
-{% for offer in buy_offers %}
-{{ offer.asset_name }} | {{ offer.completion_condition }} | Unit: {{ offer.unit }} | Currency: {{ offer.currency }}  
-<a class="btn" href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-
-<br>
-{% endfor %}
-{% else %}
-You have no active buy offers.
-{% endif %}
-<br>
-<h3>Offers to sell:</h3><br>
-{% if sell_offers.first is not None %}
-{% for offer in sell_offers %}
-{{ offer.asset_name }} | {{ offer.completion_condition }} | Unit: {{ offer.unit }} | Currency: {{ offer.currency }} 
-<a class="btn" href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-<br>
-{% endfor %}
-{% else %}
-You have no active sell offers.
-{% endif %}
-<br>
-<h3>Completed offers:</h3><br>
-{% if completed_offers.first is not None %}
-{% for offer in completed_offers %}
-{{ offer.asset_name }} | {{ offer.quantity }} {{ offer.unit }} | {{ offer.price }} {{ offer.currency }} | Buyer: {{offer.buyer}} | Seller: {{offer.seller}}
-<br>
-{% endfor %}
-{% else %}
-You have no completed offers.
-{% endif %}
+<script>
+	$(document).ready(function(){
+		$('.tabs').tabs();
+	});      
+</script>
+<div class = "container"> 
+	<div class="row">
+		<div class="col s12">
+			<ul class="tabs">
+				<li class="tab col s4"><a href="#test1">Buying Offers</a></li>
+				<li class="tab col s4"><a href="#test2">Selling Offers</a></li>
+				<li class="tab col s4"><a href="#test4">Completed Offers</a></li>
+			</ul>
+		</div>
+		<div id="test1" class="col s12" >
+			{% if buy_offers.first is not None %}
+			{% for offer in buy_offers %}
+			<div class="card blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ offer.asset_name }}</span>
+					<p>{{ offer.completion_condition }}</p>
+					<p>Unit: {{ offer.unit }}</p>
+					<p>Currency: {{ offer.currency }}</p>
+				</div>
+				<div class="card-action">
+					<a href="{% url 'webapp:details' offer.id %}">Details</a>
+					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
+					<a href="#">Delete Offer</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no active buy offers.
+			{% endif %}
+			<br>
+		</div>
+		<div id="test2" class="col s12">
+			{% if sell_offers.first is not None %}
+			{% for offer in sell_offers %}
+			<div class="card blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ offer.asset_name }}</span>
+					<p>{{ offer.completion_condition }}</p>
+					<p>Unit: {{ offer.unit }} </p>
+					<p>Currency: {{ offer.currency }}</p>
+				</div>
+				<div class="card-action">
+					<a href="{% url 'webapp:details' offer.id %}">Details</a>
+					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
+					<a href="#">Delete Offer</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no active sell offers.
+			{% endif %}
+			<br>
+		</div>
+		<div id="test4" class="col s12">
+			{% if completed_offers.first is not None %}
+			{% for offer in completed_offers %}
+			<div class="card blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ offer.asset_name }}</span>
+					<p>{{ offer.completion_condition }}</p>
+					<p>Unit: {{ offer.unit }} Currency: {{ offer.currency }}</p>
+					<p>Buyer: {{offer.buyer}}</p>
+					<p>Seller: {{offer.seller}}</p>
+				</div>
+				<div class="card-action">
+					<a href="{% url 'webapp:details' offer.id %}">Details</a>
+				</div>
+			</div>			
+			{% endfor %}
+			{% else %}
+			You have no completed offers.
+			{% endif %}
+			
+		</div>
+	</div>
+</div>
 {% endblock %}
+
