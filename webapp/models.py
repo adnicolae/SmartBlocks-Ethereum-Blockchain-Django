@@ -28,8 +28,8 @@ class Offer(models.Model):
     CONTRACT_CHOICES = ((BUY, 'BUY'),(SELL, 'SELL'))    
     contract_type = models.CharField(max_length=4, choices=CONTRACT_CHOICES, default=BUY)
     
-    location = models.CharField(max_length=8)
-    completion_date = models.DateField()
+    #location = models.CharField(max_length=8)
+    #completion_date = models.DateField()
     
     def write(self):
         return '{' + '"buyer" : "{}", "seller" : "{}", "asset_name" : "{}", "unit" : "{}", "currency" : "{}", "quantity" : "{}", "price" : "{}"'.format(self.buyer, self.seller, self.asset_name, self.unit, self.currency, self.quantity, self.price) + '}'
@@ -51,5 +51,5 @@ class SignupForm(UserCreationForm):
 class OfferCreationForm(ModelForm):
     class Meta:
         model = Offer
-        fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency', 'completion_date']
+        fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency']
         
