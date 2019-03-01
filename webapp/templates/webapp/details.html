@@ -14,9 +14,7 @@ Seller: {{ offer.seller }}
 <br>
 Asset Name: {{ offer.asset_name }} <br>
 Quantity: {{ offer.quantity }} {{ offer.unit }} <br>
-Price {{ offer.price }} {{ offer.currency }} <br>
-Shipping location: {{offer.location}} <br>
-Required completion date: {{offer.completion_date}} <br></br>
+Price {{ offer.price }} {{ offer.currency }} <br></br>
 <a class="btn" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br> 
 <a class="btn" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
 {% endblock %}

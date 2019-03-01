@@ -97,7 +97,7 @@ def createOffer(request):
             offer.buyer = user
             priority = 'buyer'
 
-        offer.location = 'CV47AL'
+        #offer.location = 'CV47AL'
 
         # contract sent to blockchain server
         # must run server.py to test
