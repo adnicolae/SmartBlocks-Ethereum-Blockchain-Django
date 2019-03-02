@@ -2,7 +2,8 @@ from django.db import models
 from django.forms import ModelForm
 from django.conf import settings
 from django.contrib.auth.models import User
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.forms import UserCreationForm
 
 from django import forms
@@ -47,6 +48,25 @@ class SignupForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'password1', 'password2']
 
+# Additional class to store a user's wallet information
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    wallet_private_key = models.CharField(max_length=64)
+    wallet_address = models.CharField(max_length=42)
+
+@receiver(post_save, sender=User)
+def create_user_wallet(sender, instance, created, **kwargs):
+    if created:
+        Wallet.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_wallet(sender, instance, **kwargs):
+    instance.wallet.save()
+
+class WalletForm(forms.ModelForm):
+    class Meta:
+        model = Wallet
+        fields = ['wallet_private_key', 'wallet_address']
         
 class OfferCreationForm(ModelForm):
     class Meta:
