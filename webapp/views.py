@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms import ModelForm
-from webapp.models import UserForm,OfferCreationForm,SignupForm,Offer
+from webapp.models import UserForm,WalletForm,OfferCreationForm,SignupForm,Offer
 from webapp.backend import MyBackend
 from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
@@ -283,6 +283,20 @@ def changeUsername(request):
 	else:
 		form = ChangeUsernameForm()
 	return render(request,'webapp/changeUsername.html',{'form':form})
+
+@login_required
+def changeWallet(request):
+	if request.method == 'POST':
+		form = WalletForm(request.POST, instance=request.user.wallet)
+		if form.is_valid():
+			wallet = form.save()
+			return redirect('webapp:mySmartBlocks')
+		else:
+			messages.error(request, "Wrong address.")
+	else:
+		form = WalletForm(instance = request.user.wallet)
+	return render(request, 'webapp/changeWallet.html', {'form': form})
+
 
 @login_required
 def accountSetting(request):
