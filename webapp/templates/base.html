@@ -29,12 +29,14 @@
 		<ul style="min-width:150px" id='dropdown1' class='dropdown-content'>
 			<li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
 			<li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
+            <li><a href="{% url 'webapp:createAsset' %}">Create Asset</a></li>
 			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
 		</ul>          
 		<ul style="min-width:200px;" id='dropdown2' class='dropdown-content'>
 			<li><a href="{% url 'webapp:offers' %}"><p>Hello, {{ request.user.first_name }}<br>{{ request.user }}</p></a></li>
 			<li class="divider" tabindex="-1"></li>
-			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
+			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
+            <li><a href="{% url 'webapp:myAssets' %}">My Assets</a></li>
 			<li><a href="#">Sign Out</a></li>
 			<li><a href="{% url 'webapp:accountSetting' %}">Settings</a></li>
 		</ul>     
@@ -57,7 +59,9 @@
 						<ul>
 							<li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
 							<li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
+                            <li><a href="{% url 'webapp:createAsset' %}">Create Asset</a></li>
 							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
+                            <li><a href="{% url 'webapp:myAssets' %}">My Assets</a></li>
 							<li><a href="{% url 'webapp:searchOffer' %}">Search for Offers</a></li>
 							<li class="divider" tabindex="-1"></li>
 						</ul>     
@@ -72,7 +76,8 @@
 					<a class="collapsible-header" style="padding:0 32px;"><i class="large material-icons left">account_circle</i>Account</a>
 					<div class="collapsible-body">
 						<ul>
-							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
+							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
+                            <li><a href="{% url 'webapp:myAssets' %}">My Assets</a></li>
 							<li><a href="#">Sign Out</a></li>
 							<li><a href="{% url 'webapp:accountSetting' %}">Settings</a></li>
 							<li class="divider" tabindex="-1"></li>

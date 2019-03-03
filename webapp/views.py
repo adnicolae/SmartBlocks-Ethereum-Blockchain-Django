@@ -45,7 +45,7 @@ def index(request):
 def offers(request):
 	buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
 	sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
-	eth_assets = Asset.objects.filter(stock__gt=0)
+	eth_assets = Asset.objects.filter(stock__gt=0).exclude(owner=request.user)
 	return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers, 'eth_assets':eth_assets})
 
 @login_required
@@ -54,6 +54,13 @@ def details(request, offer_id):
     if(offer is None):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
+
+@login_required
+def assetDetails(request, asset_id):
+    asset = Asset.objects.get(pk=asset_id)
+    if(asset is None):
+        return redirect('webapp:offers')
+    return render(request, 'webapp/assetDetails.html', {'asset': asset})
 
 @login_required
 def sign(request, offer_id):
