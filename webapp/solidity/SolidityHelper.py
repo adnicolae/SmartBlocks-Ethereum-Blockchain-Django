@@ -3,7 +3,7 @@ from webapp.solidity import contract_abi
 from web3 import Web3, HTTPProvider
 from djutils.decorators import async
 import hashlib, base64, datetime
-from webapp.models import Asset, Record
+from webapp.models import Asset, Record, User
 
 # Address of deployed contract on the Ropsten Test Network
 contract_address = '0xad61D6168Ec5218Aef4B60a2255F70232314adF0'
@@ -66,6 +66,7 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
     print(processed_receipt)
 
     asset = Asset.objects.get(generatedId=generatedId)
+    user = User.objects.get(wallet__wallet_address=wallet_address)
 
     if processed_receipt:
         argss = processed_receipt[0].args
@@ -74,6 +75,9 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
             argss._price, "wei per unit")
         asset.assetAddress = argss.assetAddress
         asset.transactionStatus = asset.SUCCESS
+        user.wallet.ether_balance = getBalance(user.wallet.wallet_address)
+
+        user.save()
     else:
         print("Added but failed")
         asset.transactionStatus = asset.FAIL
@@ -121,6 +125,7 @@ def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amoun
 
     record = Record.objects.get(generatedId=recordId)
     asset = Asset.objects.get(generatedId=generatedId)
+    buyer = User.objects.get(wallet__wallet_address=buyer_wallet_address)
 
     if processed_receipt:
         argss = processed_receipt[0].args
@@ -128,12 +133,15 @@ def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amoun
             "Record: " + argss.recordId + " of buyer " + argss.buyer + " of asset " + argss.asset)
         record.status = record.TRANSIT
         asset.stock = get_asset_stock(asset.assetAddress)
+        buyer.wallet.ether_balance = getBalance(buyer.wallet.wallet_address)
+
+        asset.save()
+        buyer.save()
     else:
         print("Added but failed")
         record.status = record.TXFAILED
 
     record.save()
-    asset.save()
 
     return {'status': 'added', 'txn_receipt': txn_receipt, 'processed_receipt': processed_receipt}
 
