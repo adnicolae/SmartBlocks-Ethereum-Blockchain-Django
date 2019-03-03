@@ -3,6 +3,7 @@ from webapp.solidity import contract_abi
 from web3 import Web3, HTTPProvider
 from djutils.decorators import async
 import hashlib, base64, datetime
+from webapp.models import Asset
 
 # Address of deployed contract on the Ropsten Test Network
 contract_address = '0xad61D6168Ec5218Aef4B60a2255F70232314adF0'
@@ -57,13 +58,20 @@ def create_asset(generatedId, name, description, price, stock, location, transfe
     processed_receipt = contract.events.AssetCreated().processReceipt(tx_receipt)
     print(processed_receipt)
 
+    asset = Asset.objects.get(generatedId=generatedId)
+
     if processed_receipt:
         argss = processed_receipt[0].args
         print(
             "Asset " + argss.name + " with address " + argss.assetAddress + " has been added to the network " + "and costs",
             argss._price, "wei per unit")
+        asset.assetAddress = argss.assetAddress
+        asset.transactionStatus = asset.SUCCESS
     else:
         print("Added but failed")
+        asset.transactionStatus = asset.FAIL
+
+    asset.save()
 
     return {'status': 'added', 'processed_receipt': processed_receipt}
 
