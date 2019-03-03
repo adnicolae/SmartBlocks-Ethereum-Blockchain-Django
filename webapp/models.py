@@ -103,6 +103,7 @@ class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     wallet_private_key = models.CharField(max_length=64)
     wallet_address = models.CharField(max_length=42)
+    ether_balance = models.DecimalField(default=0, max_digits=20, decimal_places=4)
 
 @receiver(post_save, sender=User)
 def create_user_wallet(sender, instance, created, **kwargs):

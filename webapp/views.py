@@ -386,6 +386,8 @@ def changeWallet(request):
 		form = WalletForm(request.POST, instance=request.user.wallet)
 		if form.is_valid():
 			wallet = form.save()
+			wallet.ether_balance = SolidityHelper.getBalance(wallet.wallet_address)
+			wallet.save()
 			return redirect('webapp:mySmartBlocks')
 		else:
 			messages.error(request, "Wrong address.")

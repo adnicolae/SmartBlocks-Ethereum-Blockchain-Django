@@ -22,6 +22,13 @@ w3.eth.enable_unaudited_features()
 # Define contract object to work with
 contract = w3.eth.contract(address=Web3.toChecksumAddress(contract_address), abi=contract_abi.abi)
 
+
+# Get ether balance of an address
+def getBalance(wallet_address):
+    wei = w3.eth.getBalance(wallet_address)
+    balance = w3.fromWei(wei, 'ether')
+    return balance
+
 # Generate a short hashcode
 def generateId(assetName):
     asset = assetName + str(datetime.datetime.now())
