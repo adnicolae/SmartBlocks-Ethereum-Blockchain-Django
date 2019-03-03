@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms import ModelForm
-from webapp.models import UserForm,WalletForm,OfferCreationForm,AssetCreationForm,SignupForm,Offer,Asset
+from webapp.models import RecordForm,Record,UserForm,WalletForm,OfferCreationForm,AssetCreationForm,SignupForm,Offer,Asset
 from webapp.backend import MyBackend
 from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
@@ -57,10 +57,33 @@ def details(request, offer_id):
 
 @login_required
 def assetDetails(request, asset_id):
-    asset = Asset.objects.get(pk=asset_id)
-    if(asset is None):
-        return redirect('webapp:offers')
-    return render(request, 'webapp/assetDetails.html', {'asset': asset})
+	asset = Asset.objects.get(pk=asset_id)
+	user = User.objects.get(pk=request.user.id)
+	if(asset is None):
+		return redirect('webapp:offers')
+	if request.method == "POST":
+		form = RecordForm(request.POST)
+		if form.is_valid():
+			record = form.save(commit=False)
+
+			record.generatedId = str(SolidityHelper.generateId(user.username))[2:-1]
+			record.assetAddress = asset.assetAddress
+			record.status = record.PROCESSING
+			record.owed = record.amount * asset.price/2
+			record.buyer = user
+			print(record.buyer)
+			print(asset.generatedId)
+			print(record.amount)
+			print(record.generatedId)
+			print(int(asset.price/2))
+
+			record.save()
+
+			SolidityHelper.buy_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
+			return redirect("webapp:myAssets")
+	else:
+		form = RecordForm()
+	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
 
 @login_required
 def sign(request, offer_id):
@@ -74,7 +97,6 @@ def sign(request, offer_id):
         offer.seller = user
     offer.save()
     return redirect('webapp:myOffers')
-    
 
 def login_view(request):
     if request.method == "POST":
@@ -117,9 +139,10 @@ def createAsset(request):
 			user = User.objects.get(id=request.user.id)
 			carrier = User.objects.get(username='carrier@solidity.com')
 
+			genid = SolidityHelper.generateId(asset.name)
 			asset.owner = user
 			asset.carrier = carrier
-			asset.generatedId = SolidityHelper.generateId(asset.name)
+			asset.generatedId = str(genid)[2:-1]
 			asset.transactionStatus = asset.SUBMITTED
 
 			print("Asset name: ", asset.name)
@@ -129,13 +152,12 @@ def createAsset(request):
 
 			asset.save()
 
-			SolidityHelper.create_asset(asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
+			SolidityHelper.create_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
 										int(form.cleaned_data['price']), int(form.cleaned_data['stock']),
 										form.cleaned_data['location'], form.cleaned_data['transferTime'],
 										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
 										[90, 10])
-
-		return render(request, 'webapp/createAsset.html', {'form': form})
+			return redirect("webapp:myAssets")
 	else:
 		form = AssetCreationForm()
 	return render(request, 'webapp/createAsset.html', {'form': form})
@@ -235,7 +257,8 @@ def myOffers(request):
 def myAssets(request):
 	user = request.user
 	assets = Asset.objects.filter(owner=user)
-	return render(request, 'webapp/myAssets.html', {'owned_assets': assets})
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myAssets.html', {'owned_assets': assets, 'records': records})
 
 @login_required
 def matchOffer(request, offer_id):
