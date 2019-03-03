@@ -66,13 +66,16 @@ class Asset(models.Model):
 class Record(models.Model):
     generatedId = models.CharField(max_length=12)
     assetAddress = models.CharField(max_length=64)
-    TRANSIT = 'Transit'
+    PROCESSING = 'Processing'
+    TXFAILED = 'Transaction Failed'
+    TRANSIT = 'TRANSIT'
     DELIVERED = 'Delivered'
     CONFIRMED = 'Confirmed'
-    ASSET_STATUS = ((TRANSIT, 'TRANSIT'), (DELIVERED, 'DELIVERED'), (CONFIRMED, 'CONFIRMED'))
-    status = models.CharField(max_length=9, choices=ASSET_STATUS, default=TRANSIT)
-    owed = models.DecimalField(default=0, max_digits=20, decimal_places=18)
+    ASSET_STATUS = ((PROCESSING, 'PROCESSING'), (TXFAILED, 'TRANSACTION FAILED'), (TRANSIT, 'TRANSIT'), (DELIVERED, 'DELIVERED'), (CONFIRMED, 'CONFIRMED'))
+    status = models.CharField(max_length=18, choices=ASSET_STATUS, default=PROCESSING)
+    owed = models.IntegerField(default=0)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0)
 
 class AssetCreationForm(ModelForm):
     class Meta:
@@ -85,6 +88,10 @@ class UserForm(ModelForm):
         model = User
         fields = ['email','password']
 
+class RecordForm(ModelForm):
+    class Meta:
+        model = Record
+        fields = ['amount']
 
 class SignupForm(UserCreationForm):
     class Meta:
