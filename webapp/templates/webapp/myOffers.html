@@ -23,7 +23,7 @@
 		<div id="test1" class="col s12" >
 			{% if buy_offers.first is not None %}
 			{% for offer in buy_offers %}
-			<div class="card blue-grey darken-1">
+			<div class="card hoverable blue-grey darken-1">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>
@@ -45,7 +45,7 @@
 		<div id="test2" class="col s12">
 			{% if sell_offers.first is not None %}
 			{% for offer in sell_offers %}
-			<div class="card blue-grey darken-1">
+			<div class="card hoverable blue-grey darken-1">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>
@@ -67,7 +67,7 @@
 		<div id="test4" class="col s12">
 			{% if completed_offers.first is not None %}
 			{% for offer in completed_offers %}
-			<div class="card blue-grey darken-1">
+			<div class="card hoverable blue-grey darken-1">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>

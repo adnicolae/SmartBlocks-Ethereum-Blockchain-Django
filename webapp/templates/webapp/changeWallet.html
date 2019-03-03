@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Change Wallet{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">Change Wallet</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+  <div class="container">
+{% csrf_token %}
+{{ form }}
+    <center>
+   <button class="btn waves-effect waves-light" type="submit">Change
+    <i class="material-icons right">send</i>
+  </button>
+  <br>
+</div>
+</form>
+{% endblock %}
