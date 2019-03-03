@@ -84,8 +84,9 @@ def register(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
+            user.email = user.username
             raw_password = form.cleaned_data.get('password1')
-            user = auth.authenticate(username=user.email, password=raw_password)
+            user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
             return redirect('webapp:mySmartBlocks')
     else:
@@ -126,16 +127,17 @@ def sign(request, offer_id):
     return redirect('webapp:myOffers')
 
 def login_view(request):
-    form = UserForm(request.POST)
-    if form.is_valid():
-        username=form.cleaned_data.get('email')
-        password=form.cleaned_data.get('password')
-        user = auth.authenticate(username=username,password=password)
-        if(user is not None) :
-            auth.login(request, user)
-            return redirect('webapp:mySmartBlocks')
-        else:
-            form = UserForm()
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            username=form.cleaned_data.get('email')
+            password=form.cleaned_data.get('password')
+            user = auth.authenticate(username=username,password=password)
+            if(user is not None) :
+                auth.login(request, user)
+                return redirect('webapp:mySmartBlocks')
+    else:
+        form = UserForm()
     return render(request, 'webapp/login.html', {'form': form})
 
 def logout_view(request):
