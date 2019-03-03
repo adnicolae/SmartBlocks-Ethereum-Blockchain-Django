@@ -45,7 +45,17 @@ class Offer(models.Model):
             list.append(i.split(","))
         return list
         
-    
+
+class Record(models.Model):
+    recordId = models.CharField(max_length=12)
+    assetAddress = models.CharField(max_length=64)
+    TRANSIT = 'Transit'
+    DELIVERED = 'Delivered'
+    CONFIRMED = 'Confirmed'
+    ASSET_STATUS = ((TRANSIT, 'TRANSIT'), (DELIVERED, 'DELIVERED'), (CONFIRMED, 'CONFIRMED'))
+    status = models.CharField(max_length=9, choices=ASSET_STATUS, default=TRANSIT)
+    owed = models.DecimalField(default=0, max_digits=20, decimal_places=18)
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
    
 class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
