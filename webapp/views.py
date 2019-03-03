@@ -67,17 +67,31 @@ def sign(request, offer_id):
     return redirect('webapp:myOffers')
 
 def login_view(request):
-    form = UserForm(request.POST)
-    if form.is_valid():
-        username=form.cleaned_data.get('email')
-        password=form.cleaned_data.get('password')
-        user = auth.authenticate(username=username,password=password)
-        if(user is not None) :
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            username=form.cleaned_data.get('email')
+            password=form.cleaned_data.get('password')
+            user = auth.authenticate(username=username,password=password)
+            if(user is not None) :
+                auth.login(request, user)
+                return redirect('webapp:mySmartBlocks')
+    else:
+        form = UserForm()
+    return render(request, 'webapp/login.html', {'form': form})
+    
+def register(request):
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            raw_password = form.cleaned_data.get('password1')
+            user = auth.authenticate(username=user.email, password=raw_password)
             auth.login(request, user)
             return redirect('webapp:mySmartBlocks')
-        else:
-            form = UserForm()
-    return render(request, 'webapp/login.html', {'form': form})
+    else:
+        form = SignupForm()
+    return render(request, 'webapp/register.html', {'form': form})
 
 def logout_view(request):
     auth.logout(request)
@@ -85,53 +99,56 @@ def logout_view(request):
 
 @login_required
 def createOffer(request):
-    form = OfferCreationForm(request.POST)
-    if form.is_valid():
-        offer = form.save(commit=False)
-        user = User.objects.get(id=request.user.id)
+    if request.method == "POST":        
+        form = OfferCreationForm(request.POST)
+        if form.is_valid():
+            offer = form.save(commit=False)
+            user = User.objects.get(id=request.user.id)
 
-        if form.cleaned_data.get('contract_type') == 'Sell' :
-            offer.seller = user
-            priority = 'seller'
-        else:
-            offer.buyer = user
-            priority = 'buyer'
+            if form.cleaned_data.get('contract_type') == 'Sell' :
+                offer.seller = user
+                priority = 'seller'
+            else:
+                offer.buyer = user
+                priority = 'buyer'
 
-        #offer.location = 'CV47AL'
+            #offer.location = 'CV47AL'
 
-        # contract sent to blockchain server
-        # must run server.py to test
-        jsonContract = offer.write()
-        endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
-        connection = connectProtocol(endpoint, SendBlockchainProtocol())
-        connection.addCallback(sendJSON, jsonContract)
-        reactor.run(installSignalHandlers=0)
+            # contract sent to blockchain server
+            # must run server.py to test
+            jsonContract = offer.write()
+            endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
+            connection = connectProtocol(endpoint, SendBlockchainProtocol())
+            connection.addCallback(sendJSON, jsonContract)
+            reactor.run(installSignalHandlers=0)
 
-        #try to find match
-        if form.cleaned_data.get('contract_type') == 'Buy':
-            potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
-        else:
-            potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
+            #try to find match
+            if form.cleaned_data.get('contract_type') == 'Buy':
+                potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
+            else:
+                potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
 
-        for m in potential_matches:
-            if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
-                #match found, calculate price and quantity to trade at
-                offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
-                if priority == 'buyer':
-                    offer.seller = m.seller
-                else:
-                    offer.buyer = m.buyer
+            for m in potential_matches:
+                if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
+                    #match found, calculate price and quantity to trade at
+                    offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
+                    if priority == 'buyer':
+                        offer.seller = m.seller
+                    else:
+                        offer.buyer = m.buyer
 
-                #creates json serialisation to send to blockchain
-                d = json.loads(offer.write())
-                # e.g. blockchain.add(d) goes here
-                #will also need to add this to
+                    #creates json serialisation to send to blockchain
+                    d = json.loads(offer.write())
+                    # e.g. blockchain.add(d) goes here
+                    #will also need to add this to
 
-                break
+                    break
 
-        offer.save()
+            offer.save()
 
-        return redirect('webapp:myOffers')
+            return redirect('webapp:myOffers')
+    else:
+        form = OfferCreationForm()
     return render(request, 'webapp/createOffer.html', {'form': form})
 
 def changeOffer(request, offer_id):
@@ -237,16 +254,7 @@ def mySmartBlocks(request):
 def about(request):
     return render(request, 'webapp/about.html')
 
-def register(request):
-    form = SignupForm(request.POST)
-    if form.is_valid():
-        user = form.save()
-        user.email = user.username
-        raw_password = form.cleaned_data.get('password1')
-        user = auth.authenticate(username=user.username, password=raw_password)
-        auth.login(request, user)
-        return redirect('webapp:mySmartBlocks')
-    return render(request, 'webapp/register.html', {'form': form})
+
 
 @login_required
 def changePassword(request):
