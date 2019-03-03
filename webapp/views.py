@@ -64,6 +64,7 @@ def sign(request, offer_id):
         offer.seller = user
     offer.save()
     return redirect('webapp:myOffers')
+    
 
 def login_view(request):
     if request.method == "POST":
@@ -74,7 +75,7 @@ def login_view(request):
             user = auth.authenticate(username=username,password=password)
             if(user is not None) :
                 auth.login(request, user)
-                return redirect('webapp:mySmartBlocks')
+                return redirect((request.GET.get('next','webapp:mySmartBlocks')))
     else:
         form = UserForm()
     return render(request, 'webapp/login.html', {'form': form})
@@ -92,53 +93,6 @@ def register(request):
     else:
         form = SignupForm()
     return render(request, 'webapp/register.html', {'form': form})
-
-def logout_view(request):
-    auth.logout(request)
-    return redirect('webapp:index')
-
-def index(request):
-    return render(request, 'webapp/index.html')
-
-@login_required
-def offers(request):
-    buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
-    sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
-    return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
-
-@login_required
-def details(request, offer_id):
-    offer = Offer.objects.get(pk=offer_id)
-    if(offer is None):
-        return redirect('webapp:offers')
-    return render(request, 'webapp/details.html', {'offer':offer})
-
-@login_required
-def sign(request, offer_id):
-    offer = Offer.objects.get(pk=offer_id)
-    user = User.objects.get(pk=request.user.id)
-    if(offer is None):
-        return redirect('webapp:offers')
-    if(offer.buyer is None):
-        offer.buyer = user
-    elif(offer.seller is None):
-        offer.seller = user
-    offer.save()
-    return redirect('webapp:myOffers')
-
-def login_view(request):
-    if request.method == "POST":
-        form = UserForm(request.POST)
-        if form.is_valid():
-            username=form.cleaned_data.get('email')
-            password=form.cleaned_data.get('password')
-            user = auth.authenticate(username=username,password=password)
-            if(user is not None) :
-                auth.login(request, user)
-                return redirect('webapp:mySmartBlocks')
-    else:
-        form = UserForm()
-    return render(request, 'webapp/login.html', {'form': form})
 
 def logout_view(request):
     auth.logout(request)
