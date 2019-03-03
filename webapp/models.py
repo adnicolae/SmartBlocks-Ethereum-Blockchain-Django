@@ -44,10 +44,27 @@ class Offer(models.Model):
         for i in self.bounds.split("|"):
             list.append(i.split(","))
         return list
-        
+
+class Asset(models.Model):
+    generatedId = models.CharField(max_length=12)
+    assetAddress = models.CharField(max_length=64)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    price = models.IntegerField(default=0)
+    stock = models.IntegerField(default=0)
+    location = models.CharField(max_length=8)
+    transferTime = models.IntegerField(default=0)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='msg_owner', on_delete=models.CASCADE)
+    carrier = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='msg_carrier', on_delete=models.CASCADE)
+    SUBMITTED = 'SUBMITTED'
+    SUCCESS = 'SUCCESS'
+    FAIL = 'FAIL'
+    STATUS_CHOICES = ((SUBMITTED, 'SUBMITTED'), (SUCCESS, 'SUCCESS'), (FAIL, 'FAIL'))
+    transactionStatus = models.CharField(max_length=9, choices=STATUS_CHOICES, default=SUBMITTED)
+
 
 class Record(models.Model):
-    recordId = models.CharField(max_length=12)
+    generatedId = models.CharField(max_length=12)
     assetAddress = models.CharField(max_length=64)
     TRANSIT = 'Transit'
     DELIVERED = 'Delivered'
@@ -56,7 +73,12 @@ class Record(models.Model):
     status = models.CharField(max_length=9, choices=ASSET_STATUS, default=TRANSIT)
     owed = models.DecimalField(default=0, max_digits=20, decimal_places=18)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-   
+
+class AssetCreationForm(ModelForm):
+    class Meta:
+        model = Asset
+        fields = ['name', 'description', 'price', 'stock', 'location', 'transferTime']
+
 class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     class Meta:
