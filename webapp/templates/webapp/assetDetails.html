@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Asset Information{% endblock %}
+
+{% block header %}
+      <h1 class="header center blue-text">Details of {{ asset.name }}</h1>
+{% endblock %}
+
+{% block content %}
+Owner: {{ asset.owner.username }} <br>
+Carrier: {{ asset.carrier.username }} <br>
+Available stock: {{ asset.stock }} <br>
+Price per unit (Wei): {{ asset.price }} <br>
+Estimated transfer time: {{ asset.transferTime }} <br>
+Description: {{ asset.description }}
+{#<a class="btn" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br> #}
+{#<a class="btn" href="{% url 'webapp:offers' %}">Back to all offers</a><br>#}
+{% endblock %}
