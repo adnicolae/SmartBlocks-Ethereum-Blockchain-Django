@@ -14,6 +14,10 @@ class Offer(models.Model):
     asset_name = models.CharField(max_length=100)
     condition_help = "Keywords: <span class='keyword'>AND</span>, <span class='keyword'>OR</span>.</br>Operations: <, >, =</br>Variables: <span class='variable'>price</span>, <span class='variable'>quantity</span></br>Use parentheses to group statements.</br></br>Example:</br> (<span class='variable'>price</span> < 100 <span class='keyword'>AND</span> (<span class='variable'>quantity</span> > 20 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 50)) </br><span class='keyword'>OR</span> (<span class='variable'>price</span> < 120 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 20)"
     completion_condition = models.CharField(max_length=256, help_text=condition_help)
+    
+    #format: priceLow,priceHigh,quantLow,quantHigh|...|...
+    bounds = models.CharField(max_length=256, default="0,{},0,{}".format(str(2**31), str(2**31)))
+    
     unit = models.CharField(max_length=10)    
     GBP = 'GBP'
     USD = 'USD'
@@ -34,6 +38,13 @@ class Offer(models.Model):
     
     def write(self):
         return '{' + '"buyer" : "{}", "seller" : "{}", "asset_name" : "{}", "unit" : "{}", "currency" : "{}", "quantity" : "{}", "price" : "{}"'.format(self.buyer, self.seller, self.asset_name, self.unit, self.currency, self.quantity, self.price) + '}'
+        
+    def boundsAsList(self):
+        list = []
+        for i in self.bounds.split("|"):
+            list.append(i.split(","))
+        return list
+        
     
    
 class UserForm(ModelForm):

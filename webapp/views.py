@@ -16,7 +16,7 @@ from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
-from .matcher import checkMatch
+from .matcher import match, parseString
 
 import json
 
@@ -103,6 +103,7 @@ def createOffer(request):
     if request.method == "POST":
         form = OfferCreationForm(request.POST)
         if form.is_valid():
+        
             offer = form.save(commit=False)
             user = User.objects.get(id=request.user.id)
 
@@ -112,16 +113,30 @@ def createOffer(request):
             else:
                 offer.buyer = user
                 priority = 'buyer'
-
-            #offer.location = 'CV47AL'
-
+        
+            clause = parseString(form.cleaned_data.get('completion_condition'))
+                    
+            index = 0
+            strBounds = ""
+            for bounds in clause.bounds:
+                if index >= 1 :
+                    strBounds+="|"
+                strBounds += "{},{},{},{}".format(str(bounds.pl), str(bounds.pu), str(bounds.ql), str(bounds.qu))
+                index+=1
+                
+            offer.bounds = strBounds
+            
             # contract sent to blockchain server
             # must run server.py to test
+            '''
+            @kabir this is in the wrong place, should run when a match is found
+            
             jsonContract = offer.write()
             endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
             connection = connectProtocol(endpoint, SendBlockchainProtocol())
             connection.addCallback(sendJSON, jsonContract)
             reactor.run(installSignalHandlers=0)
+            '''
 
             #try to find match
             if form.cleaned_data.get('contract_type') == 'Buy':
@@ -130,9 +145,11 @@ def createOffer(request):
                 potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
 
             for m in potential_matches:
-                if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
+                pot_mat_clause = parseString(m.completion_condition)
+                out = match(clause.bounds, pot_mat_clause.bounds, priority)
+                if out is not None:
                     #match found, calculate price and quantity to trade at
-                    offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
+                    offer.price, offer.quantity = match(clause.bounds, pot_mat_clause.bounds, priority)
                     if priority == 'buyer':
                         offer.seller = m.seller
                     else:
@@ -145,6 +162,7 @@ def createOffer(request):
 
                     break
 
+            print(offer)
             offer.save()
 
             return redirect('webapp:myOffers')
