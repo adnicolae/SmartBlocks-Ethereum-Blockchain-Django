@@ -24,3 +24,37 @@ body {
 .page-footer {
   flex-shrink: 0;
 }
+
+.offer {
+  border-bottom: 1px solid black;
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  margin: 5px;
+}
+
+.assetName {
+  font-weight: 400;
+  color: DarkBlue;
+  font-size: 18px;
+}
+
+.date {
+  font-weight: 300;
+  font-size: 14px;
+  float: right;
+}
+
+.by {
+  font-weight: 300;
+  font-size: 14px;
+}
+
+.price {
+  color: DarkRed;
+  font-size: 20px;
+}
+
+.quantity {
+  font-size: 14px;
+}

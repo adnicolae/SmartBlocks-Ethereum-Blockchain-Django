@@ -7,7 +7,7 @@
 <form method="post">
   <div class="container">
 {% csrf_token %}
-{{ form }}
+{{ form.as_p }}
     <center>
    <button class="btn waves-effect waves-light" type="submit">Register
     <i class="material-icons right">send</i>

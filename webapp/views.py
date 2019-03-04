@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms import ModelForm
-from webapp.models import UserForm,OfferCreationForm,SignupForm,Offer
+from webapp.models import RecordForm,Record,UserForm,WalletForm,OfferCreationForm,AssetCreationForm,SignupForm,Offer,Asset
 from webapp.backend import MyBackend
 from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
@@ -16,7 +16,9 @@ from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
-from .matcher import checkMatch
+from .matcher import match, parseString
+
+from webapp.solidity import SolidityHelper
 
 import json
 
@@ -36,15 +38,15 @@ def sendJSON(p, data):
     d = p.sendContract(str.encode(data + '\r\n'))
     d.addCallback(lambda stop: reactor.stop())
 
-
 def index(request):
     return render(request, 'webapp/index.html')
 
 @login_required
 def offers(request):
-    buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
-    sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
-    return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
+	buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
+	sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
+	eth_assets = Asset.objects.filter(stock__gt=0).exclude(owner=request.user)
+	return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers, 'eth_assets':eth_assets})
 
 @login_required
 def details(request, offer_id):
@@ -52,6 +54,36 @@ def details(request, offer_id):
     if(offer is None):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
+
+@login_required
+def assetDetails(request, asset_id):
+	asset = Asset.objects.get(pk=asset_id)
+	user = User.objects.get(pk=request.user.id)
+	if(asset is None):
+		return redirect('webapp:offers')
+	if request.method == "POST":
+		form = RecordForm(request.POST)
+		if form.is_valid():
+			record = form.save(commit=False)
+
+			record.generatedId = str(SolidityHelper.generateId(user.username))[2:-1]
+			record.asset = asset
+			record.status = record.PROCESSING
+			record.owed = record.amount * asset.price/2
+			record.buyer = user
+			print(record.buyer)
+			print(asset.generatedId)
+			print(record.amount)
+			print(record.generatedId)
+			print(int(asset.price/2))
+
+			record.save()
+
+			SolidityHelper.buy_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
+			return redirect("webapp:myOffers")
+	else:
+		form = RecordForm()
+	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
 
 @login_required
 def sign(request, offer_id):
@@ -67,71 +99,139 @@ def sign(request, offer_id):
     return redirect('webapp:myOffers')
 
 def login_view(request):
-    form = UserForm(request.POST)
-    if form.is_valid():
-        username=form.cleaned_data.get('email')
-        password=form.cleaned_data.get('password')
-        user = auth.authenticate(username=username,password=password)
-        if(user is not None) :
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            username=form.cleaned_data.get('email')
+            password=form.cleaned_data.get('password')
+            user = auth.authenticate(username=username,password=password)
+            if(user is not None) :
+                auth.login(request, user)
+                return redirect((request.GET.get('next','webapp:mySmartBlocks')))
+    else:
+        form = UserForm()
+    return render(request, 'webapp/login.html', {'form': form})
+    
+def register(request):
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.email = user.username
+            raw_password = form.cleaned_data.get('password1')
+            user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
             return redirect('webapp:mySmartBlocks')
-        else:
-            form = UserForm()
-    return render(request, 'webapp/login.html', {'form': form})
+    else:
+        form = SignupForm()
+    return render(request, 'webapp/register.html', {'form': form})
 
 def logout_view(request):
     auth.logout(request)
     return redirect('webapp:index')
 
 @login_required
+def createAsset(request):
+	if request.method == "POST":
+		form = AssetCreationForm(request.POST)
+		if form.is_valid():
+			asset = form.save(commit = False)
+			user = User.objects.get(id=request.user.id)
+			carrier = User.objects.get(username='carrier@solidity.com')
+
+			genid = SolidityHelper.generateId(asset.name)
+			asset.owner = user
+			asset.carrier = carrier
+			asset.generatedId = str(genid)[2:-1]
+			asset.transactionStatus = asset.SUBMITTED
+
+			print("Asset name: ", asset.name)
+			print("User wallet: ", user.wallet.wallet_address)
+			print("Carrier wallet: ", carrier.wallet.wallet_address)
+			print("Asset id: ", asset.generatedId)
+
+			asset.save()
+
+			SolidityHelper.create_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
+										int(form.cleaned_data['price']), int(form.cleaned_data['stock']),
+										form.cleaned_data['location'], form.cleaned_data['transferTime'],
+										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
+										[90, 10])
+			return redirect("webapp:myOffers")
+	else:
+		form = AssetCreationForm()
+	return render(request, 'webapp/createAsset.html', {'form': form})
+
+@login_required
 def createOffer(request):
-    form = OfferCreationForm(request.POST)
-    if form.is_valid():
-        offer = form.save(commit=False)
-        user = User.objects.get(id=request.user.id)
+    if request.method == "POST":
+        form = OfferCreationForm(request.POST)
+        if form.is_valid():
+        
+            offer = form.save(commit=False)
+            user = User.objects.get(id=request.user.id)
 
-        if form.cleaned_data.get('contract_type') == 'Sell' :
-            offer.seller = user
-            priority = 'seller'
-        else:
-            offer.buyer = user
-            priority = 'buyer'
+            if form.cleaned_data.get('contract_type') == 'Sell' :
+                offer.seller = user
+                priority = 'seller'
+            else:
+                offer.buyer = user
+                priority = 'buyer'
+        
+            clause = parseString(form.cleaned_data.get('completion_condition'))
+                    
+            index = 0
+            strBounds = ""
+            for bounds in clause.bounds:
+                if index >= 1 :
+                    strBounds+="|"
+                strBounds += "{},{},{},{}".format(str(bounds.pl), str(bounds.pu), str(bounds.ql), str(bounds.qu))
+                index+=1
+                
+            offer.bounds = strBounds
+            
+            # contract sent to blockchain server
+            # must run server.py to test
+            '''
+            @kabir this is in the wrong place, should run when a match is found
+            
+            jsonContract = offer.write()
+            endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
+            connection = connectProtocol(endpoint, SendBlockchainProtocol())
+            connection.addCallback(sendJSON, jsonContract)
+            reactor.run(installSignalHandlers=0)
+            '''
 
-        #offer.location = 'CV47AL'
+            #try to find match
+            if form.cleaned_data.get('contract_type') == 'Buy':
+                potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
+            else:
+                potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
 
-        # contract sent to blockchain server
-        # must run server.py to test
-        jsonContract = offer.write()
-        endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
-        connection = connectProtocol(endpoint, SendBlockchainProtocol())
-        connection.addCallback(sendJSON, jsonContract)
-        reactor.run(installSignalHandlers=0)
+            for m in potential_matches:
+                pot_mat_clause = parseString(m.completion_condition)
+                out = match(clause.bounds, pot_mat_clause.bounds, priority)
+                if out is not None:
+                    #match found, calculate price and quantity to trade at
+                    offer.price, offer.quantity = match(clause.bounds, pot_mat_clause.bounds, priority)
+                    if priority == 'buyer':
+                        offer.seller = m.seller
+                    else:
+                        offer.buyer = m.buyer
 
-        #try to find match
-        if form.cleaned_data.get('contract_type') == 'Buy':
-            potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
-        else:
-            potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
+                    #creates json serialisation to send to blockchain
+                    d = json.loads(offer.write())
+                    # e.g. blockchain.add(d) goes here
+                    #will also need to add this to
 
-        for m in potential_matches:
-            if checkMatch(offer.completion_condition, m.completion_condition, priority) is not None:
-                #match found, calculate price and quantity to trade at
-                offer.price, offer.quantity = checkMatch(offer.completion_condition, m.completion_condition, priority)
-                if priority == 'buyer':
-                    offer.seller = m.seller
-                else:
-                    offer.buyer = m.buyer
+                    break
 
-                #creates json serialisation to send to blockchain
-                d = json.loads(offer.write())
-                # e.g. blockchain.add(d) goes here
-                #will also need to add this to
+            print(offer)
+            offer.save()
 
-                break
-
-        offer.save()
-
-        return redirect('webapp:myOffers')
+            return redirect('webapp:myOffers')
+    else:
+        form = OfferCreationForm()
     return render(request, 'webapp/createOffer.html', {'form': form})
 
 def changeOffer(request, offer_id):
@@ -147,11 +247,20 @@ def changeOffer(request, offer_id):
 
 @login_required
 def myOffers(request):
-    user = request.user
-    buy_offers = Offer.objects.filter(buyer=user,seller=None)
-    sell_offers = Offer.objects.filter(seller=user,buyer=None)
-    completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
-    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
+	user = request.user
+	buy_offers = Offer.objects.filter(buyer=user,seller=None)
+	sell_offers = Offer.objects.filter(seller=user,buyer=None)
+	completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers, 'assets':assets, 'records':records})
+
+@login_required
+def myAssets(request):
+	user = request.user
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myAssets.html', {'owned_assets': assets, 'records': records})
 
 @login_required
 def matchOffer(request, offer_id):
@@ -237,17 +346,6 @@ def mySmartBlocks(request):
 def about(request):
     return render(request, 'webapp/about.html')
 
-def register(request):
-    form = SignupForm(request.POST)
-    if form.is_valid():
-        user = form.save()
-        user.email = user.username
-        raw_password = form.cleaned_data.get('password1')
-        user = auth.authenticate(username=user.username, password=raw_password)
-        auth.login(request, user)
-        return redirect('webapp:mySmartBlocks')
-    return render(request, 'webapp/register.html', {'form': form})
-
 @login_required
 def changePassword(request):
 
@@ -283,6 +381,21 @@ def changeUsername(request):
 	else:
 		form = ChangeUsernameForm()
 	return render(request,'webapp/changeUsername.html',{'form':form})
+
+@login_required
+def changeWallet(request):
+	if request.method == 'POST':
+		form = WalletForm(request.POST, instance=request.user.wallet)
+		if form.is_valid():
+			wallet = form.save()
+			wallet.ether_balance = SolidityHelper.getBalance(wallet.wallet_address)
+			wallet.save()
+			return redirect('webapp:mySmartBlocks')
+		else:
+			messages.error(request, "Wrong address.")
+	else:
+		form = WalletForm(instance = request.user.wallet)
+	return render(request, 'webapp/changeWallet.html', {'form': form})
 
 @login_required
 def accountSetting(request):

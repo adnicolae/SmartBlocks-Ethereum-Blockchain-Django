@@ -6,45 +6,67 @@
 {% endblock %}
 
 {% block content %}
-<h3>Offers to buy:</h3><br>
+
+<div class="row">
+<div class="col s12">
+<ul class="tabs">
+    <li class="tab col s6"><a href="#buy">Buying Offers</a></li>
+    <li class="tab col s6"><a href="#sell">Selling Offers</a></li>
+    <li class="tab col s6"><a href="#assets">ETH Assets</a></li>
+</ul>
+</div>
+<div id="buy" class="col s12">
 {% if buy_offers.first is not None %}
 {% for offer in buy_offers %}
-{{ offer.asset_name }} | {{ offer.completion_condition }} {{ offer.currency }} <a class="btn" href="{% url 'webapp:details' offer.id %}">More details</a><br>
+{% for b in offer.boundsAsList %}
+<div class="offer">
+<a class="assetName" href="{% url 'webapp:details' offer.id %}">{{ offer.asset_name }}</a><span class="date">03 March 2019</span><br>
+<span class="by">by {{ offer.buyer }}</span><br><br>
+<span class="price">{{ b.1 }} {{ offer.currency }}</span><br>
+<span class="quantity">{{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
+<a style="float: right;" class="btn" href="{% url 'webapp:details' offer.id %}">More details</a>
+</div>
+{% endfor %}
 {% endfor %}
 {% else %}
 There are no buy offers at this time.
 {% endif %}
-<br>
-<h3>Offers to sell:</h3><br>
+</div>
+
+<div id="sell" class="col s12">
 {% if sell_offers.first is not None %}
 {% for offer in sell_offers %}
-{{ offer.asset_name }} | {{ offer.completion_condition }} {{ offer.currency }} <a class="btn" href="{% url 'webapp:details' offer.id %}">More details</a><br>
+{% for b in offer.boundsAsList %}
+<div class="offer">
+<a class="assetName" href="{% url 'webapp:details' offer.id %}">{{ offer.asset_name }}</a><span class="date">03 March 2019</span><br>
+<span class="by">by {{ offer.seller }}</span><br><br>
+<span class="price">{{ b.0 }}</span><br>
+<span class="quantity">{{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
+<a style="float: right;" class="btn" href="{% url 'webapp:details' offer.id %}">More details</a>
+</div>
+{% endfor %}
 {% endfor %}
 {% else %}
 There are no sell offers at this time.
 {% endif %}
-<!--
-  <div class="row">
-    <div class="col s12 m5">
-  <div class="card sticky-action small">
-    <div class="card-content">
-      <span class="card-title activator grey-text text-darken-4">Offer<i class="material-icons right">more_vert</i></span>
-    </div>
-    <div class="card-action"><a class="btn">Sign Contract</a></div>
-    <div class="card-reveal">
-      <span class="card-title grey-text text-darken-4">Offer details<i class="material-icons right">close</i></span>
-      <p>
-          <ul>
-            <li>Steel</li>
-            <li>10 tonnes</li>
-            <li>$15000</li>
-            <li>$1500/tonne</li>
-            <li>Within 2 weeks</li>
-          </ul>
-      </p>
-    </div>
-  </div>
-  </div>
-  </div>
-  -->
+</div>
+
+<div id="assets" class="col s12">
+{% if eth_assets.first is not None %}
+{% for asset in eth_assets %}
+<div class="offer">
+<a class="assetName" href="{% url 'webapp:assetDetails' asset.id %}">{{ asset.name }}</a><span class="date">03 March 2019</span><br>
+<span class="by">by {{ asset.owner.username }}</span><br><br>
+<span class="price">{{ asset.price }} Wei</span><br>
+<span class="quantity">{{ asset.stock }} units in stock</span>
+<a style="float: right;" class="btn" href="{% url 'webapp:assetDetails' asset.id %}">More details</a>
+</div>
+{% endfor %}
+{% else %}
+There are no Ethereum assets registered in stock.
+{% endif %}
+</div>
+
+</div>
+
 {% endblock %}

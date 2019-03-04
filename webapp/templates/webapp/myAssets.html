@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}My Assets{% endblock %}
+{% block header %}
+      <h1 class="header center blue-text">My Assets</h1>
+{% endblock %}
+
+{% block content %}
+<script>
+	$(document).ready(function(){
+		$('.tabs').tabs();
+	});      
+</script>
+<div class = "container"> 
+	<div class="row">
+		<div class="col s12">
+			<ul class="tabs">
+				<li class="tab col s4"><a href="#created_assets">Created</a></li>
+                <li class="tab col s4"><a href="#bought_assets">Bought</a></li>
+			</ul>
+		</div>
+		<div id="created_assets" class="col s12">
+			{% if owned_assets.first is not None %}
+			{% for asset in owned_assets %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ asset.asset_name }}</span>
+					<p>Generated ID: {{ asset.generatedId }}</p>
+                    <p>Address: {{ asset.assetAddress }}</p>
+					<p>Status: {{ asset.transactionStatus }} </p>
+					<p>Carrier: {{ asset.carrier.username }}</p>
+                    <p>Owner: {{ asset.owner.username }}</p>
+                    <p>Current stock: {{ asset.stock }}</p>
+				</div>
+{#				<div class="card-action">#}
+{#					<a href="{% url 'webapp:details' offer.id %}">Details</a>#}
+{#					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>#}
+{#					<a href="#">Delete Offer</a>#}
+{#				</div>#}
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no registered assets.
+			{% endif %}
+			<br>
+
+		</div>
+    		<div id="bought_assets" class="col s12">
+			{% if records.first is not None %}
+			{% for record in records %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ record.assetAddress }}</span>
+					<p>Amount: {{ record.amount }}</p>
+                    <p>Status: {{ record.status }}</p>
+					<p>ETH Owed (Wei): {{ record.owed }} </p>
+				</div>
+{#				<div class="card-action">#}
+{#					<a href="{% url 'webapp:details' offer.id %}">Details</a>#}
+{#					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>#}
+{#					<a href="#">Delete Offer</a>#}
+{#				</div>#}
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no registered assets.
+			{% endif %}
+			<br>
+		</div>
+
+	</div>
+</div>
+{% endblock %}
+

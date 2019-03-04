@@ -21,9 +21,7 @@ def match(buyBounds, sellBounds, priority):
 def overlap(lb1, ub1, lb2, ub2):
     if lb2 > ub1 or ub2 < lb1 :
         return False
-    return True        
-            
-def checkMatch(buyString, sellString, priority):
-    buyClause = parse(buyString)
-    sellClause = parse(sellString)
-    return match(buyClause.bounds, sellClause.bounds, priority)
+    return True
+    
+def parseString(string):
+    return parse(string);
