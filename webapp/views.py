@@ -6,6 +6,9 @@ from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
+from django.urls import reverse
+from urllib.parse import urlencode
+
 from django.db.models import Q
 
 from django.contrib.auth.models import User
@@ -39,7 +42,10 @@ def sendJSON(p, data):
     d.addCallback(lambda stop: reactor.stop())
 
 def index(request):
-    return render(request, 'webapp/index.html')
+    if(request.GET.get('logout') is None):
+        return render(request, 'webapp/index.html')
+    return render(request, 'webapp/index.html', {'toast':'You have successfully logged out'})
+    
 
 @login_required
 def offers(request):
@@ -128,7 +134,9 @@ def register(request):
 
 def logout_view(request):
     auth.logout(request)
-    return redirect('webapp:index')
+    base_url = reverse('webapp:index')
+    url = '{}?{}'.format(base_url, 'logout')
+    return redirect(url)
 
 @login_required
 def createAsset(request):
@@ -228,7 +236,11 @@ def createOffer(request):
 
             print(offer)
             offer.save()
-
+            
+            detailsURL = reverse('webapp:details', args=[offer.id])
+            toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action" href="{}">View</a>'.format(detailsURL);
+            
+            messages.success(request, toastHTML)
             return redirect('webapp:myOffers')
     else:
         form = OfferCreationForm()

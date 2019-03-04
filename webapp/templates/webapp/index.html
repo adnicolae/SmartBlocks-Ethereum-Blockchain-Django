@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block title %}
 SmartBlocks
 {% endblock %}
@@ -14,5 +13,10 @@ SmartBlocks
 {% endblock %}
 
 {% block content %}
+{% if toast %}
+<script>
+M.toast({html: '{{ toast }}', classes: 'blue'})
+</script>
+{% endif %}
 {% endblock %}
 
