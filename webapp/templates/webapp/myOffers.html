@@ -62,7 +62,38 @@
 			{% else %}
 			You have no active sell offers.
 			{% endif %}
-			<br>
+
+            {#  Ethereum Assets #}
+            {% if assets.first is not None %}
+			{% for asset in assets %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ asset.name }}  <span class="new badge grey" data-badge-caption="Ethereum"></span>
+                        {% if asset.transactionStatus == asset.SUCCESS %}
+                        <span class="new badge green" data-badge-caption="Success"></span>
+                        {% elif asset.transactionStatus == asset.FAIL %}
+                        <span class="new badge red" data-badge-caption="Fail"></span>
+                        {% else %}
+                        <span class="new badge grey" data-badge-caption="Submitted"></span>
+                        {% endif %}
+                    </span>
+{#					<p>Generated ID: {{ asset.generatedId }}</p>#}
+{#                    <p>Address: {{ asset.assetAddress }}</p>#}
+{#					<p>Status: {{ asset.transactionStatus }} </p>#}
+					<p>Carrier: {{ asset.carrier.username }}</p>
+                    <p>Price: {{ asset.price }} Wei</p>
+                    <p>Current stock: {{ asset.stock }}</p>
+				</div>
+                <div class="card-action">
+					<a href="#">Details</a>
+					<a href="#">Edit Asset</a>
+					<a href="#">Delete Asset</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no Ethereum assets.
+			{% endif %}
 		</div>
 		<div id="test4" class="col s12">
 			{% if completed_offers.first is not None %}
@@ -83,7 +114,41 @@
 			{% else %}
 			You have no completed offers.
 			{% endif %}
-			
+
+            {#  Ethereum Assets #}
+            {% if records.first is not None %}
+                <br>
+                Ethereum assets owned:
+			{% for record in records %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ record.asset.name }}
+                    {% if record.status == record.CONFIRMED %}
+                        <span class="new badge green" data-badge-caption="Confirmed"></span>
+                        {% elif record.status == record.TXFAILED %}
+                        <span class="new badge red" data-badge-caption="Failed"></span>
+                        {% elif record.status == record.TRANSIT %}
+                        <span class="new badge blue" data-badge-caption="In Transit"></span>
+                        {% elif record.status == record.DELIVERED %}
+                        <span class="new badge orange" data-badge-caption="Delivered"></span>
+                        {% else %}
+                        <span class="new badge grey" data-badge-caption="Processing"></span>
+                    {% endif %}
+                    </span>
+                    <p>Record code: {{ record.generatedId }}</p>
+					<p>Amount: {{ record.amount }}</p>
+					<p>ETH Owed (Wei): {{ record.owed }} </p>
+				</div>
+				<div class="card-action">
+					<a href="{% url 'webapp:recordDetails' record.id %}">Details</a>
+					<a href="#">Delete Record</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no bought assets.
+			{% endif %}
+			<br>
 		</div>
 	</div>
 </div>

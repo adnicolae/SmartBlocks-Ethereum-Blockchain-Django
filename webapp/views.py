@@ -61,6 +61,32 @@ def details(request, offer_id):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
 
+
+@login_required
+def updateStatus(request, record_generated_id):
+	user = User.objects.get(pk=request.user.id)
+	record = Record.objects.get(generatedId=record_generated_id)
+
+	previous_status = record.status
+
+	if user.id == record.buyer.id and record.status == record.DELIVERED:
+		record.status = record.CONFIRMED
+	elif user.id == record.asset.carrier.id and record.status == record.TRANSIT:
+		record.status = record.DELIVERED
+
+	record.save()
+	return render(request, 'webapp/status.html', {'record': record, 'previous_status': previous_status})
+
+@login_required
+def recordDetails(request, record_id):
+	record = Record.objects.get(pk=record_id)
+	if record is None:
+		return redirect('webapp:myOffers')
+
+	qr_code = SolidityHelper.generateQRCode(record.generatedId)
+
+	return render(request, 'webapp/recordDetails.html', {'record': record, 'qr_code': qr_code})
+
 @login_required
 def assetDetails(request, asset_id):
 	asset = Asset.objects.get(pk=asset_id)
@@ -73,7 +99,7 @@ def assetDetails(request, asset_id):
 			record = form.save(commit=False)
 
 			record.generatedId = str(SolidityHelper.generateId(user.username))[2:-1]
-			record.assetAddress = asset.assetAddress
+			record.asset = asset
 			record.status = record.PROCESSING
 			record.owed = record.amount * asset.price/2
 			record.buyer = user
@@ -85,8 +111,8 @@ def assetDetails(request, asset_id):
 
 			record.save()
 
-			SolidityHelper.buy_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
-			return redirect("webapp:myAssets")
+			SolidityHelper.buy_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
+			return redirect("webapp:myOffers")
 	else:
 		form = RecordForm()
 	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
@@ -160,12 +186,12 @@ def createAsset(request):
 
 			asset.save()
 
-			SolidityHelper.create_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
+			SolidityHelper.create_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
 										int(form.cleaned_data['price']), int(form.cleaned_data['stock']),
 										form.cleaned_data['location'], form.cleaned_data['transferTime'],
 										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
 										[90, 10])
-			return redirect("webapp:myAssets")
+			return redirect("webapp:myOffers")
 	else:
 		form = AssetCreationForm()
 	return render(request, 'webapp/createAsset.html', {'form': form})
@@ -259,11 +285,13 @@ def changeOffer(request, offer_id):
 
 @login_required
 def myOffers(request):
-    user = request.user
-    buy_offers = Offer.objects.filter(buyer=user,seller=None)
-    sell_offers = Offer.objects.filter(seller=user,buyer=None)
-    completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
-    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
+	user = request.user
+	buy_offers = Offer.objects.filter(buyer=user,seller=None)
+	sell_offers = Offer.objects.filter(seller=user,buyer=None)
+	completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers, 'assets':assets, 'records':records})
 
 @login_required
 def myAssets(request):

@@ -3,6 +3,7 @@ from webapp.solidity import contract_abi
 from web3 import Web3, HTTPProvider
 from djutils.decorators import async
 import hashlib, base64, datetime
+import pyqrcode
 from webapp.models import Asset, Record, User
 
 # Address of deployed contract on the Ropsten Test Network
@@ -23,6 +24,14 @@ w3.eth.enable_unaudited_features()
 contract = w3.eth.contract(address=Web3.toChecksumAddress(contract_address), abi=contract_abi.abi)
 
 
+# Generate QR Code for Record
+def generateQRCode(record_generated_id):
+    url = pyqrcode.create('http://localhost:8000/webapp/status/'+record_generated_id)
+    # url.png('qr_codes/qr_'+record_generated_id+'.png', scale=6, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
+    image_as_str = url.png_as_base64_str(scale=5)
+    html_img = '<img src="data:image/png;base64,{}">'.format(image_as_str)
+    return html_img
+
 # Get ether balance of an address
 def getBalance(wallet_address):
     wei = w3.eth.getBalance(wallet_address)
@@ -37,7 +46,7 @@ def generateId(assetName):
     return encoded
 
 @async
-def create_asset(wallet_address, wallet_private_key, generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares):
+def create_asset(user_id, wallet_address, wallet_private_key, generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares):
     nonce = w3.eth.getTransactionCount(wallet_address)
 
     txn_dict = contract.functions.createDigitalAsset(generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares).buildTransaction({
@@ -66,7 +75,7 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
     print(processed_receipt)
 
     asset = Asset.objects.get(generatedId=generatedId)
-    user = User.objects.get(wallet__wallet_address=wallet_address)
+    user = User.objects.get(id=user_id)
 
     if processed_receipt:
         argss = processed_receipt[0].args
@@ -87,7 +96,7 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
     return {'status': 'added', 'processed_receipt': processed_receipt}
 
 @async
-def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amount_to_buy, recordId, amount_in_wei):
+def buy_asset(user_id, buyer_wallet_address, buyer_wallet_private_key, generatedId, amount_to_buy, recordId, amount_in_wei):
     #     amount_in_wei = w3.toWei(amount_in_ether,'ether');
     #     check if the amount inserted is the same as required
 
@@ -125,7 +134,7 @@ def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amoun
 
     record = Record.objects.get(generatedId=recordId)
     asset = Asset.objects.get(generatedId=generatedId)
-    buyer = User.objects.get(wallet__wallet_address=buyer_wallet_address)
+    buyer = User.objects.get(id=user_id)
 
     if processed_receipt:
         argss = processed_receipt[0].args
