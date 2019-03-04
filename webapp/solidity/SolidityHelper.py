@@ -37,7 +37,7 @@ def generateId(assetName):
     return encoded
 
 @async
-def create_asset(wallet_address, wallet_private_key, generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares):
+def create_asset(user_id, wallet_address, wallet_private_key, generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares):
     nonce = w3.eth.getTransactionCount(wallet_address)
 
     txn_dict = contract.functions.createDigitalAsset(generatedId, name, description, price, stock, location, transfer_time, beneficiary_addresses, price_shares).buildTransaction({
@@ -66,7 +66,7 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
     print(processed_receipt)
 
     asset = Asset.objects.get(generatedId=generatedId)
-    user = User.objects.get(wallet__wallet_address=wallet_address)
+    user = User.objects.get(id=user_id)
 
     if processed_receipt:
         argss = processed_receipt[0].args
@@ -87,7 +87,7 @@ def create_asset(wallet_address, wallet_private_key, generatedId, name, descript
     return {'status': 'added', 'processed_receipt': processed_receipt}
 
 @async
-def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amount_to_buy, recordId, amount_in_wei):
+def buy_asset(user_id, buyer_wallet_address, buyer_wallet_private_key, generatedId, amount_to_buy, recordId, amount_in_wei):
     #     amount_in_wei = w3.toWei(amount_in_ether,'ether');
     #     check if the amount inserted is the same as required
 
@@ -125,7 +125,7 @@ def buy_asset(buyer_wallet_address, buyer_wallet_private_key, generatedId, amoun
 
     record = Record.objects.get(generatedId=recordId)
     asset = Asset.objects.get(generatedId=generatedId)
-    buyer = User.objects.get(wallet__wallet_address=buyer_wallet_address)
+    buyer = User.objects.get(id=user_id)
 
     if processed_receipt:
         argss = processed_receipt[0].args

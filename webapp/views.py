@@ -79,7 +79,7 @@ def assetDetails(request, asset_id):
 
 			record.save()
 
-			SolidityHelper.buy_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
+			SolidityHelper.buy_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
 			return redirect("webapp:myAssets")
 	else:
 		form = RecordForm()
@@ -152,7 +152,7 @@ def createAsset(request):
 
 			asset.save()
 
-			SolidityHelper.create_asset(user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
+			SolidityHelper.create_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
 										int(form.cleaned_data['price']), int(form.cleaned_data['stock']),
 										form.cleaned_data['location'], form.cleaned_data['transferTime'],
 										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
