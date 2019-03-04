@@ -65,7 +65,7 @@ class Asset(models.Model):
 
 class Record(models.Model):
     generatedId = models.CharField(max_length=12)
-    assetAddress = models.CharField(max_length=64)
+    # assetAddress = models.CharField(max_length=64)
     PROCESSING = 'Processing'
     TXFAILED = 'Transaction Failed'
     TRANSIT = 'TRANSIT'
@@ -75,6 +75,7 @@ class Record(models.Model):
     status = models.CharField(max_length=18, choices=ASSET_STATUS, default=PROCESSING)
     owed = models.IntegerField(default=0)
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.DO_NOTHING, null=True)
     amount = models.IntegerField(default=0)
 
 class AssetCreationForm(ModelForm):

@@ -67,7 +67,7 @@ def assetDetails(request, asset_id):
 			record = form.save(commit=False)
 
 			record.generatedId = str(SolidityHelper.generateId(user.username))[2:-1]
-			record.assetAddress = asset.assetAddress
+			record.asset = asset
 			record.status = record.PROCESSING
 			record.owed = record.amount * asset.price/2
 			record.buyer = user
@@ -80,7 +80,7 @@ def assetDetails(request, asset_id):
 			record.save()
 
 			SolidityHelper.buy_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
-			return redirect("webapp:myAssets")
+			return redirect("webapp:myOffers")
 	else:
 		form = RecordForm()
 	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
@@ -157,7 +157,7 @@ def createAsset(request):
 										form.cleaned_data['location'], form.cleaned_data['transferTime'],
 										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
 										[90, 10])
-			return redirect("webapp:myAssets")
+			return redirect("webapp:myOffers")
 	else:
 		form = AssetCreationForm()
 	return render(request, 'webapp/createAsset.html', {'form': form})
@@ -247,11 +247,13 @@ def changeOffer(request, offer_id):
 
 @login_required
 def myOffers(request):
-    user = request.user
-    buy_offers = Offer.objects.filter(buyer=user,seller=None)
-    sell_offers = Offer.objects.filter(seller=user,buyer=None)
-    completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
-    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
+	user = request.user
+	buy_offers = Offer.objects.filter(buyer=user,seller=None)
+	sell_offers = Offer.objects.filter(seller=user,buyer=None)
+	completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers, 'assets':assets, 'records':records})
 
 @login_required
 def myAssets(request):
