@@ -117,7 +117,7 @@
         <script>
         {% for message in messages %}
         {% autoescape off%}
-        M.toast({html: '{{ message }}'});
+        M.toast({html: '{{ message }}', classes:"blue"});
         {% endautoescape %}
         {% endfor %}
         </script>

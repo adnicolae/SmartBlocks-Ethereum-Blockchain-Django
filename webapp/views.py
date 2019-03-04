@@ -42,9 +42,7 @@ def sendJSON(p, data):
     d.addCallback(lambda stop: reactor.stop())
 
 def index(request):
-    if(request.GET.get('logout') is None):
-        return render(request, 'webapp/index.html')
-    return render(request, 'webapp/index.html', {'toast':'You have successfully logged out'})
+    return render(request, 'webapp/index.html')
     
 
 @login_required
@@ -160,9 +158,9 @@ def register(request):
 
 def logout_view(request):
     auth.logout(request)
-    base_url = reverse('webapp:index')
-    url = '{}?{}'.format(base_url, 'logout')
-    return redirect(url)
+    toastHTML = '<span>Logged out successfully</span>'    
+    messages.success(request, toastHTML)
+    return redirect('webapp:index')
 
 @login_required
 def createAsset(request):
