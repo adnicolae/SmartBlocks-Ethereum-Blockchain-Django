@@ -36,7 +36,7 @@
 			<li><a href="{% url 'webapp:offers' %}"><p>Hello, {{ request.user.first_name }}<br>{{ request.user }}</p></a></li>
 			<li class="divider" tabindex="-1"></li>
 			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
-			<li><a href="#">Sign Out</a></li>
+            <li><a href="{% url 'webapp:logout_view' %}">Sign Out</a></li>
 			<li><a href="{% url 'webapp:accountSetting' %}">Settings</a></li>
 		</ul>     
 
@@ -75,7 +75,7 @@
 					<div class="collapsible-body">
 						<ul>
 							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
-							<li><a href="#">Sign Out</a></li>
+			                <li><a href="{% url 'webapp:logout_view' %}">Sign Out</a></li>
 							<li><a href="{% url 'webapp:accountSetting' %}">Settings</a></li>
 							<li class="divider" tabindex="-1"></li>
 						</ul>     
