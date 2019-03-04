@@ -3,6 +3,7 @@ from webapp.solidity import contract_abi
 from web3 import Web3, HTTPProvider
 from djutils.decorators import async
 import hashlib, base64, datetime
+import pyqrcode
 from webapp.models import Asset, Record, User
 
 # Address of deployed contract on the Ropsten Test Network
@@ -22,6 +23,14 @@ w3.eth.enable_unaudited_features()
 # Define contract object to work with
 contract = w3.eth.contract(address=Web3.toChecksumAddress(contract_address), abi=contract_abi.abi)
 
+
+# Generate QR Code for Record
+def generateQRCode(record_generated_id):
+    url = pyqrcode.create('https://localhost:8000/webapp/status/'+record_generated_id)
+    # url.png('qr_codes/qr_'+record_generated_id+'.png', scale=6, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
+    image_as_str = url.png_as_base64_str(scale=5)
+    html_img = '<img src="data:image/png;base64,{}">'.format(image_as_str)
+    return html_img
 
 # Get ether balance of an address
 def getBalance(wallet_address):

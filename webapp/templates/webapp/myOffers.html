@@ -140,7 +140,7 @@
 					<p>ETH Owed (Wei): {{ record.owed }} </p>
 				</div>
 				<div class="card-action">
-					<a href="#">Details</a>
+					<a href="{% url 'webapp:recordDetails' record.id %}">Details</a>
 					<a href="#">Delete Record</a>
 				</div>
 			</div>

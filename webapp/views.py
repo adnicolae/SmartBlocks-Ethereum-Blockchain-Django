@@ -55,6 +55,32 @@ def details(request, offer_id):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
 
+
+@login_required
+def updateStatus(request, record_generated_id):
+	user = User.objects.get(pk=request.user.id)
+	record = Record.objects.get(generatedId=record_generated_id)
+
+	previous_status = record.status
+
+	if user.id == record.buyer.id and record.status == record.DELIVERED:
+		record.status = record.CONFIRMED
+	elif user.id == record.asset.carrier.id and record.status == record.TRANSIT:
+		record.status = record.DELIVERED
+
+	record.save()
+	return render(request, 'webapp/status.html', {'record': record, 'previous_status': previous_status})
+
+@login_required
+def recordDetails(request, record_id):
+	record = Record.objects.get(pk=record_id)
+	if record is None:
+		return redirect('webapp:myOffers')
+
+	qr_code = SolidityHelper.generateQRCode(record.generatedId)
+
+	return render(request, 'webapp/recordDetails.html', {'record': record, 'qr_code': qr_code})
+
 @login_required
 def assetDetails(request, asset_id):
 	asset = Asset.objects.get(pk=asset_id)
