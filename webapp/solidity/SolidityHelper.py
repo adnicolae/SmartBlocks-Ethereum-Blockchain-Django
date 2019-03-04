@@ -26,7 +26,7 @@ contract = w3.eth.contract(address=Web3.toChecksumAddress(contract_address), abi
 
 # Generate QR Code for Record
 def generateQRCode(record_generated_id):
-    url = pyqrcode.create('https://localhost:8000/webapp/status/'+record_generated_id)
+    url = pyqrcode.create('http://localhost:8000/webapp/status/'+record_generated_id)
     # url.png('qr_codes/qr_'+record_generated_id+'.png', scale=6, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
     image_as_str = url.png_as_base64_str(scale=5)
     html_img = '<img src="data:image/png;base64,{}">'.format(image_as_str)
