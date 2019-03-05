@@ -145,8 +145,9 @@ def register(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user.email = user.username
+            user = form.save(commit=False)
+            user.username = user.email
+            user.save()
             raw_password = form.cleaned_data.get('password1')
             user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
