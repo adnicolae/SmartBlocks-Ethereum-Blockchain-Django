@@ -10,9 +10,9 @@
 <div class="row">
 <div class="col s12">
 <ul class="tabs">
-    <li class="tab col s6"><a href="#buy">Buying Offers</a></li>
-    <li class="tab col s6"><a href="#sell">Selling Offers</a></li>
-{#    <li class="tab col s6"><a href="#assets">ETH Assets</a></li>#}
+    <li class="tab col s4"><a href="#buy">Buying Offers</a></li>
+    <li class="tab col s4"><a href="#sell">Selling Offers</a></li>
+    <li class="tab col s4"><a href="#assets">ETH Assets</a></li>
 </ul>
 </div>
 <div id="buy" class="col s12">
@@ -49,7 +49,9 @@ There are no buy offers at this time.
 {% else %}
 There are no sell offers at this time.
 {% endif %}
+</div>
 
+<div id="assets" class="col s12">
 {% if eth_assets.first is not None %}
 {% for asset in eth_assets %}
 <div class="offer">
@@ -64,23 +66,6 @@ There are no sell offers at this time.
 There are no Ethereum assets registered in stock.
 {% endif %}
 </div>
-
-{#<div id="assets" class="col s12">#}
-{#{% if eth_assets.first is not None %}#}
-{#{% for asset in eth_assets %}#}
-{#<div class="offer">#}
-{#<a class="assetName" href="{% url 'webapp:assetDetails' asset.id %}">{{ asset.name }}</a><span class="date">03 March 2019</span><br>#}
-{#<span class="by">by {{ asset.owner.username }}</span><br><br>#}
-{#<span class="price">{{ asset.price }} Wei</span><br>#}
-{#<span class="quantity">{{ asset.stock }} units in stock</span>#}
-{#<a style="float: right;" class="btn" href="{% url 'webapp:assetDetails' asset.id %}">More details</a>#}
-{#</div>#}
-{#{% endfor %}#}
-{#{% else %}#}
-{#There are no Ethereum assets registered in stock.#}
-{#{% endif %}#}
-{#</div>#}
-
 </div>
 
 {% endblock %}
