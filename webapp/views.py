@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.forms import ModelForm
 from webapp.models import RecordForm,Record,UserForm,WalletForm,OfferCreationForm,AssetCreationForm,SignupForm,Offer,Asset
-from webapp.backend import MyBackend
 from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
