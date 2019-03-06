@@ -14,7 +14,8 @@
             onOpenStart: function() {
                 let offerId = $(document).find("#delete-modal-trigger").data("offerid");
                 let deleteButton = $("#delete-modal").find("#delete-button");
-                deleteButton.attr("href", "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId));
+                let deleteUrl = "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId);
+                deleteButton.attr("href", deleteUrl);
             }
 		});
 	});
