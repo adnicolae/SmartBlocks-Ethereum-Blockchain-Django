@@ -8,10 +8,31 @@
 {% block content %}
 <script>
 	$(document).ready(function(){
-		$('.tabs').tabs();
-	});      
+		$(".tabs").tabs();
+
+		$("#delete-modal").modal({
+            onOpenStart: function(modal, trigger) {
+                let offerId = $(document).find("#delete-modal-trigger").data("offerid");
+                let deleteButton = $("#delete-modal").find("#delete-button");
+                deleteButton.attr("href", "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId));
+            }
+		});
+	});
 </script>
-<div class = "container"> 
+
+<!-- Modal Structure -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h4>Delete Confirmation</h4>
+        <p>Are you sure you wish to delete this offer?</p>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect waves-green btn-flat">No</a>
+        <a id="delete-button" class="waves-effect waves-green btn-flat">Yes</a>
+    </div>
+</div>
+
+<div class = "container">
 	<div class="row">
 		<div class="col s12">
 			<ul class="tabs">
@@ -33,7 +54,7 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-					<a href="{% url 'webapp:deleteOffer' offer.id %}">Delete Offer</a>
+					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal" data-offerid="{{ offer.id }}">Delete Offer</a>
 				</div>
 			</div>
 			{% endfor %}
@@ -109,7 +130,7 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 				</div>
-			</div>			
+			</div>
 			{% endfor %}
 			{% else %}
 			You have no completed offers.
