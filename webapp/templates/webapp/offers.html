@@ -40,7 +40,7 @@ There are no buy offers at this time.
 <div class="offer">
 <a class="assetName" href="{% url 'webapp:details' offer.id %}">{{ offer.asset_name }}</a><span class="date">03 March 2019</span><br>
 <span class="by">by {{ offer.seller }}</span><br><br>
-<span class="price">{{ b.0 }}</span><br>
+<span class="price">{{ b.0 }} {{ offer.currency }}</span><br>
 <span class="quantity">{{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
 <a style="float: right;" class="btn" href="{% url 'webapp:details' offer.id %}">More details</a>
 </div>
