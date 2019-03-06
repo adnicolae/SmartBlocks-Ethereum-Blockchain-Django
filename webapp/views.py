@@ -286,6 +286,13 @@ def changeOffer(request, offer_id):
 		form = OfferCreationForm(instance=offer)
 	return render(request, 'webapp/changeOffer.html',{'form':form})
 
+def deleteOffer(request, offer_id):
+	offer = Offer.objects.get(pk=offer_id)
+	offer.delete()
+	toastHTML = '<span>Offer deleted successfully!</span>'
+	messages.success(request, toastHTML)
+	return redirect('webapp:myOffers')
+
 @login_required
 def myOffers(request):
 	user = request.user

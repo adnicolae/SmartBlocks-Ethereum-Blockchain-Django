@@ -25,6 +25,7 @@ urlpatterns = [
 	path('changeUsername/', views.changeUsername, name='changeUsername'),
     path('changeWallet/', views.changeWallet, name='changeWallet'),
 	path('changeOffer/<int:offer_id>', views.changeOffer, name='changeOffer'),
+	path('deleteOffer/<int:offer_id>', views.deleteOffer, name='deleteOffer'),
 	path('searchOffer/', views.searchOffer, name='searchOffer'),
 	path('searchOfferAdvance/', views.searchOfferAdvance, name='searchOfferAdvance')
 ]

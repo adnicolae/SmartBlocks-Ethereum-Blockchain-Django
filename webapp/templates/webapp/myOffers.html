@@ -33,7 +33,7 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-					<a href="#">Delete Offer</a>
+					<a href="{% url 'webapp:deleteOffer' offer.id %}">Delete Offer</a>
 				</div>
 			</div>
 			{% endfor %}
