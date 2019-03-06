@@ -12,9 +12,9 @@
 
 		$("#delete-modal").modal({
             onOpenStart: function(modal, trigger) {
-                // Get the offer ID from the offerid data attribute of the modal trigger
+                // Get the offer ID from the offer-id data attribute of the modal trigger
                 let modalTrigger = $(trigger);
-                let offerId = modalTrigger.data("offerid");
+                let offerId = modalTrigger.data("offer-id");
 
                 // Create a URL for deleting the offer of the form: /webapp/deleteOffer/<offerId>
                 // Have to use this replace workaround (from https://stackoverflow.com/a/37311391/3806231) since offer ID is stored in a variable in JS not Python
@@ -62,7 +62,7 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal" data-offerid="{{ offer.id }}">Delete Offer</a>
+					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal" data-offer-id="{{ offer.id }}">Delete Offer</a>
 				</div>
 			</div>
 			{% endfor %}
