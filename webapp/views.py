@@ -279,6 +279,8 @@ def changeOffer(request, offer_id):
 		form = OfferCreationForm(request.POST,instance=offer)
 		if form.is_valid():
 			offer = form.save()
+			toastHTML = '<span>Offer updated successfully!</span>'
+			messages.success(request, toastHTML)
 			return redirect('webapp:myOffers')
 	else:
 		form = OfferCreationForm(instance=offer)
