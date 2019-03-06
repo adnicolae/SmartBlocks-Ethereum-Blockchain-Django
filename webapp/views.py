@@ -153,6 +153,8 @@ def register(request):
             raw_password = form.cleaned_data.get('password1')
             user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
+            toastHTML = '<span>Registered successfully!</span>'
+            messages.success(request, toastHTML)
             return redirect('webapp:mySmartBlocks')
     else:
         form = SignupForm()
