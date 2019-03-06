@@ -12,9 +12,16 @@
 
 		$("#delete-modal").modal({
             onOpenStart: function() {
-                let offerId = $(document).find("#delete-modal-trigger").data("offerid");
-                let deleteButton = $("#delete-modal").find("#delete-button");
+                // Get the offer ID from the offerid data attribute of the modal trigger
+                let modalTrigger = $(document).find("#delete-modal-trigger");
+                let offerId = modalTrigger.data("offerid");
+
+                // Create a URL for deleting the offer of the form: /webapp/deleteOffer/<offerId>
+                // Have to use this replace workaround (from https://stackoverflow.com/a/37311391/3806231) since offer ID is stored in a variable in JS not Python
                 let deleteUrl = "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId);
+
+                // Make the Yes button point to the delete offer URL
+                let deleteButton = $("#delete-modal").find("#delete-button");
                 deleteButton.attr("href", deleteUrl);
             }
 		});
