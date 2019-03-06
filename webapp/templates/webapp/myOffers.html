@@ -11,9 +11,9 @@
 		$(".tabs").tabs();
 
 		$("#delete-modal").modal({
-            onOpenStart: function() {
+            onOpenStart: function(modal, trigger) {
                 // Get the offer ID from the offerid data attribute of the modal trigger
-                let modalTrigger = $(document).find("#delete-modal-trigger");
+                let modalTrigger = $(trigger);
                 let offerId = modalTrigger.data("offerid");
 
                 // Create a URL for deleting the offer of the form: /webapp/deleteOffer/<offerId>
@@ -21,7 +21,7 @@
                 let deleteUrl = "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId);
 
                 // Make the Yes button point to the delete offer URL
-                let deleteButton = $("#delete-modal").find("#delete-button");
+                let deleteButton = $(modal).find("#delete-button");
                 deleteButton.attr("href", deleteUrl);
             }
 		});
