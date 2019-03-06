@@ -136,6 +136,8 @@ def login_view(request):
             user = auth.authenticate(username=username,password=password)
             if(user is not None) :
                 auth.login(request, user)
+                toastHTML = '<span>Logged in successfully!</span>'
+                messages.success(request, toastHTML)
                 return redirect((request.GET.get('next','webapp:mySmartBlocks')))
     else:
         form = UserForm()
