@@ -160,7 +160,7 @@ def register(request):
 
 def logout_view(request):
     auth.logout(request)
-    toastHTML = '<span>Logged out successfully</span>'    
+    toastHTML = '<span>Logged out successfully!</span>'
     messages.success(request, toastHTML)
     return redirect('webapp:index')
 
