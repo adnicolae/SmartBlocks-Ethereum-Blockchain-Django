@@ -21,8 +21,8 @@
                 let deleteUrl = "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId);
 
                 // Make the Yes button point to the delete offer URL
-                let deleteButton = $(modal).find("#delete-button");
-                deleteButton.attr("href", deleteUrl);
+                let yesButton = $(modal).find("#delete-button");
+                yesButton.attr("href", deleteUrl);
             }
 		});
 	});
