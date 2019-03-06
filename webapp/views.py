@@ -277,6 +277,7 @@ def changeOffer(request, offer_id):
 		form = OfferCreationForm(request.POST,instance=offer)
 		if form.is_valid():
 			offer = form.save()
+			return redirect('webapp:myOffers')
 	else:
 		form = OfferCreationForm(instance=offer)
 	return render(request, 'webapp/changeOffer.html',{'form':form})
