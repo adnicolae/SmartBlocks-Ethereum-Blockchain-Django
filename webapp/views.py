@@ -214,12 +214,17 @@ def searchOffer(request):
 			offers = []
 			if contract_type == 'Buy':
 				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				priority = 'seller'
 			else:
 				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+				priority = 'buyer'
 			
 			searchCondition = "p ="+ str(price) + "AND q =" + str(quantity)
+			clause = parseString(searchCondition)
 			for m in potential_matches:
-				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+				pot_mat_clause = parseString(m.completion_condition)
+				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				if out is not None:
 					offers.append(m)
 					
 			# If not offers found
@@ -245,12 +250,18 @@ def searchOfferAdvance(request):
 			offers = []
 			if contract_type == 'Buy':
 				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				priority = 'seller'
 			else:
 				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+				priority = 'buyer'
 			
 			searchCondition = form.cleaned_data['completion_condition']
+			clause = parseString(searchCondition)
+			
 			for m in potential_matches:
-				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+				pot_mat_clause = parseString(m.completion_condition)
+				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				if out is not None:
 					offers.append(m)
 					
 			# If not offers found
