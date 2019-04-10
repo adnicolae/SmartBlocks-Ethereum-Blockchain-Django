@@ -44,26 +44,67 @@ class Offer(models.Model):
         for i in self.bounds.split("|"):
             list.append(i.split(","))
         return list
-        
-    
-   
+
+class Asset(models.Model):
+    generatedId = models.CharField(max_length=12)
+    assetAddress = models.CharField(max_length=64)
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    price = models.IntegerField(default=0)
+    stock = models.IntegerField(default=0)
+    location = models.CharField(max_length=8)
+    transferTime = models.IntegerField(default=0)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='msg_owner', on_delete=models.CASCADE)
+    carrier = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='msg_carrier', on_delete=models.CASCADE)
+    SUBMITTED = 'SUBMITTED'
+    SUCCESS = 'SUCCESS'
+    FAIL = 'FAIL'
+    STATUS_CHOICES = ((SUBMITTED, 'SUBMITTED'), (SUCCESS, 'SUCCESS'), (FAIL, 'FAIL'))
+    transactionStatus = models.CharField(max_length=9, choices=STATUS_CHOICES, default=SUBMITTED)
+
+
+class Record(models.Model):
+    generatedId = models.CharField(max_length=12)
+    # assetAddress = models.CharField(max_length=64)
+    PROCESSING = 'Processing'
+    TXFAILED = 'Transaction Failed'
+    TRANSIT = 'TRANSIT'
+    DELIVERED = 'Delivered'
+    CONFIRMED = 'Confirmed'
+    ASSET_STATUS = ((PROCESSING, 'PROCESSING'), (TXFAILED, 'TRANSACTION FAILED'), (TRANSIT, 'TRANSIT'), (DELIVERED, 'DELIVERED'), (CONFIRMED, 'CONFIRMED'))
+    status = models.CharField(max_length=18, choices=ASSET_STATUS, default=PROCESSING)
+    owed = models.IntegerField(default=0)
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.DO_NOTHING, null=True)
+    amount = models.IntegerField(default=0)
+
+class AssetCreationForm(ModelForm):
+    class Meta:
+        model = Asset
+        fields = ['name', 'description', 'price', 'stock', 'location', 'transferTime']
+
 class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     class Meta:
         model = User
         fields = ['email','password']
 
+class RecordForm(ModelForm):
+    class Meta:
+        model = Record
+        fields = ['amount']
 
 class SignupForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'password1', 'password2']
+        fields = ['email', 'first_name', 'last_name', 'password1', 'password2']
 
 # Additional class to store a user's wallet information
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     wallet_private_key = models.CharField(max_length=64)
     wallet_address = models.CharField(max_length=42)
+    ether_balance = models.DecimalField(default=0, max_digits=20, decimal_places=4)
 
 @receiver(post_save, sender=User)
 def create_user_wallet(sender, instance, created, **kwargs):

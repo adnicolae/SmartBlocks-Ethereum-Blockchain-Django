@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Asset Transfer Status{% endblock %}
+{% block header %}
+      <h3 class="header center blue-text">Asset Transfer Status</h3>
+{% endblock %}
+
+{% block content %}
+<p>Asset: {{ record.asset.name }} ({{ record.asset.assetAddress }})</p>
+<p>Previous status: {{ previous_status }}</p>
+<p>Current status: {{ record.status }}</p>
+{% if record.status != previous_status %}
+    <p>The transfer status has been updated to: {{ record.status }}</p>
+{% else %}
+    <p>No change in transfer status.</p>
+{% endif %}
+{% endblock %}

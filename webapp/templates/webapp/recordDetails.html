@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Information{% endblock %}
+
+{% block header %}
+      <h1 class="header center blue-text">Record Details</h1>
+{% endblock %}
+
+{% block content %}
+    <h3>Record {{ record.generatedId }}</h3>
+    Purchase of {{ record.amount }} units of {{ record.asset.name }} ({{ record.asset.assetAddress }}) from {{ record.asset.owner.username }}. <br>
+
+    Scan the following QR Code to check the transfer status: <br>
+    {% autoescape off %}{{ qr_code }}{% endautoescape %} <br>
+
+<a class="btn" href="{% url 'webapp:myOffers' %}">Back to all offers</a><br>
+{% endblock %}

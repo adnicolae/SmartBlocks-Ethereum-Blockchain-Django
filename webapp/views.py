@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.forms import ModelForm
-from webapp.models import UserForm,WalletForm,OfferCreationForm,SignupForm,Offer
-from webapp.backend import MyBackend
+from webapp.models import RecordForm,Record,UserForm,WalletForm,OfferCreationForm,AssetCreationForm,SignupForm,Offer,Asset
 from django.contrib import auth, messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
+
+from django.urls import reverse
+from urllib.parse import urlencode
 
 from django.db.models import Q
 
@@ -17,6 +19,8 @@ from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 from django.forms.models import model_to_dict
 
 from .matcher import match, parseString
+
+from webapp.solidity import SolidityHelper
 
 import json
 
@@ -38,12 +42,14 @@ def sendJSON(p, data):
 
 def index(request):
     return render(request, 'webapp/index.html')
+    
 
 @login_required
 def offers(request):
-    buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
-    sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
-    return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers})
+	buy_offers = Offer.objects.filter(seller=None).exclude(buyer=request.user)
+	sell_offers = Offer.objects.filter(buyer=None).exclude(seller=request.user)
+	eth_assets = Asset.objects.filter(stock__gt=0).exclude(owner=request.user)
+	return render(request, 'webapp/offers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers, 'eth_assets':eth_assets})
 
 @login_required
 def details(request, offer_id):
@@ -51,6 +57,62 @@ def details(request, offer_id):
     if(offer is None):
         return redirect('webapp:offers')
     return render(request, 'webapp/details.html', {'offer':offer})
+
+
+@login_required
+def updateStatus(request, record_generated_id):
+	user = User.objects.get(pk=request.user.id)
+	record = Record.objects.get(generatedId=record_generated_id)
+
+	previous_status = record.status
+
+	if user.id == record.buyer.id and record.status == record.DELIVERED:
+		record.status = record.CONFIRMED
+	elif user.id == record.asset.carrier.id and record.status == record.TRANSIT:
+		record.status = record.DELIVERED
+
+	record.save()
+	return render(request, 'webapp/status.html', {'record': record, 'previous_status': previous_status})
+
+@login_required
+def recordDetails(request, record_id):
+	record = Record.objects.get(pk=record_id)
+	if record is None:
+		return redirect('webapp:myOffers')
+
+	qr_code = SolidityHelper.generateQRCode(record.generatedId)
+
+	return render(request, 'webapp/recordDetails.html', {'record': record, 'qr_code': qr_code})
+
+@login_required
+def assetDetails(request, asset_id):
+	asset = Asset.objects.get(pk=asset_id)
+	user = User.objects.get(pk=request.user.id)
+	if(asset is None):
+		return redirect('webapp:offers')
+	if request.method == "POST":
+		form = RecordForm(request.POST)
+		if form.is_valid():
+			record = form.save(commit=False)
+
+			record.generatedId = str(SolidityHelper.generateId(user.username))[2:-1]
+			record.asset = asset
+			record.status = record.PROCESSING
+			record.owed = record.amount * asset.price/2
+			record.buyer = user
+			print(record.buyer)
+			print(asset.generatedId)
+			print(record.amount)
+			print(record.generatedId)
+			print(int(asset.price/2))
+
+			record.save()
+
+			SolidityHelper.buy_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, record.amount, record.generatedId, int(record.amount * asset.price/2))
+			return redirect("webapp:myOffers")
+	else:
+		form = RecordForm()
+	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
 
 @login_required
 def sign(request, offer_id):
@@ -64,7 +126,6 @@ def sign(request, offer_id):
         offer.seller = user
     offer.save()
     return redirect('webapp:myOffers')
-    
 
 def login_view(request):
     if request.method == "POST":
@@ -75,6 +136,8 @@ def login_view(request):
             user = auth.authenticate(username=username,password=password)
             if(user is not None) :
                 auth.login(request, user)
+                toastHTML = '<span>Logged in successfully!</span>'
+                messages.success(request, toastHTML)
                 return redirect((request.GET.get('next','webapp:mySmartBlocks')))
     else:
         form = UserForm()
@@ -84,11 +147,14 @@ def register(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user.email = user.username
+            user = form.save(commit=False)
+            user.username = user.email
+            user.save()
             raw_password = form.cleaned_data.get('password1')
             user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
+            toastHTML = '<span>Registered successfully!</span>'
+            messages.success(request, toastHTML)
             return redirect('webapp:mySmartBlocks')
     else:
         form = SignupForm()
@@ -96,7 +162,41 @@ def register(request):
 
 def logout_view(request):
     auth.logout(request)
+    toastHTML = '<span>Logged out successfully!</span>'
+    messages.success(request, toastHTML)
     return redirect('webapp:index')
+
+@login_required
+def createAsset(request):
+	if request.method == "POST":
+		form = AssetCreationForm(request.POST)
+		if form.is_valid():
+			asset = form.save(commit = False)
+			user = User.objects.get(id=request.user.id)
+			carrier = User.objects.get(username='carrier@solidity.com')
+
+			genid = SolidityHelper.generateId(asset.name)
+			asset.owner = user
+			asset.carrier = carrier
+			asset.generatedId = str(genid)[2:-1]
+			asset.transactionStatus = asset.SUBMITTED
+
+			print("Asset name: ", asset.name)
+			print("User wallet: ", user.wallet.wallet_address)
+			print("Carrier wallet: ", carrier.wallet.wallet_address)
+			print("Asset id: ", asset.generatedId)
+
+			asset.save()
+
+			SolidityHelper.create_asset(user.id, user.wallet.wallet_address, user.wallet.wallet_private_key, asset.generatedId, form.cleaned_data['name'], form.cleaned_data['description'],
+										int(form.cleaned_data['price']), int(form.cleaned_data['stock']),
+										form.cleaned_data['location'], form.cleaned_data['transferTime'],
+										[asset.owner.wallet.wallet_address, asset.carrier.wallet.wallet_address],
+										[90, 10])
+			return redirect("webapp:myOffers")
+	else:
+		form = AssetCreationForm()
+	return render(request, 'webapp/createAsset.html', {'form': form})
 
 @login_required
 def createOffer(request):
@@ -164,7 +264,11 @@ def createOffer(request):
 
             print(offer)
             offer.save()
-
+            
+            detailsURL = reverse('webapp:details', args=[offer.id])
+            toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action" href="{}">View</a>'.format(detailsURL);
+            
+            messages.success(request, toastHTML)
             return redirect('webapp:myOffers')
     else:
         form = OfferCreationForm()
@@ -177,17 +281,36 @@ def changeOffer(request, offer_id):
 		form = OfferCreationForm(request.POST,instance=offer)
 		if form.is_valid():
 			offer = form.save()
+			toastHTML = '<span>Offer updated successfully!</span>'
+			messages.success(request, toastHTML)
+			return redirect('webapp:myOffers')
 	else:
 		form = OfferCreationForm(instance=offer)
 	return render(request, 'webapp/changeOffer.html',{'form':form})
 
+def deleteOffer(request, offer_id):
+	offer = Offer.objects.get(pk=offer_id)
+	offer.delete()
+	toastHTML = '<span>Offer deleted successfully!</span>'
+	messages.success(request, toastHTML)
+	return redirect('webapp:myOffers')
+
 @login_required
 def myOffers(request):
-    user = request.user
-    buy_offers = Offer.objects.filter(buyer=user,seller=None)
-    sell_offers = Offer.objects.filter(seller=user,buyer=None)
-    completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
-    return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers})
+	user = request.user
+	buy_offers = Offer.objects.filter(buyer=user,seller=None)
+	sell_offers = Offer.objects.filter(seller=user,buyer=None)
+	completed_offers = Offer.objects.filter(Q(buyer=user) | Q(seller=user)).exclude(buyer=None).exclude(seller=None)
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myOffers.html', {'buy_offers':buy_offers,'sell_offers':sell_offers,'completed_offers':completed_offers, 'assets':assets, 'records':records})
+
+@login_required
+def myAssets(request):
+	user = request.user
+	assets = Asset.objects.filter(owner=user)
+	records = Record.objects.filter(buyer=user)
+	return render(request, 'webapp/myAssets.html', {'owned_assets': assets, 'records': records})
 
 @login_required
 def matchOffer(request, offer_id):
@@ -315,6 +438,8 @@ def changeWallet(request):
 		form = WalletForm(request.POST, instance=request.user.wallet)
 		if form.is_valid():
 			wallet = form.save()
+			wallet.ether_balance = SolidityHelper.getBalance(wallet.wallet_address)
+			wallet.save()
 			return redirect('webapp:mySmartBlocks')
 		else:
 			messages.error(request, "Wrong address.")

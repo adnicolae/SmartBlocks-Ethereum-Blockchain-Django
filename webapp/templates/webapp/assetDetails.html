@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Asset Information{% endblock %}
+
+{% block header %}
+      <h1 class="header center blue-text">Details of {{ asset.name }}</h1>
+{% endblock %}
+
+{% block content %}
+Owner: {{ asset.owner.username }} <br>
+Carrier: {{ asset.carrier.username }} <br>
+Available stock: {{ asset.stock }} <br>
+Price per unit (Wei): {{ asset.price }} <br>
+Estimated transfer time: {{ asset.transferTime }} <br>
+Description: {{ asset.description }}
+
+<form method="post">
+  <div class="container">
+{% csrf_token %}
+{% for field in form %}
+    <div class="fieldWrapper">
+        {{field.errors}}
+        {% if field.help_text %}
+        <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+        {{ field.label_tag }} {{ field }}
+    </div>
+{% endfor %}
+   <button class="btn waves-effect waves-light" type="submit">Buy
+    <i class="material-icons right">send</i>
+  </button>
+</div>
+</form>
+{#<a class="btn" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br>#}
+<a class="btn" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
+{% endblock %}

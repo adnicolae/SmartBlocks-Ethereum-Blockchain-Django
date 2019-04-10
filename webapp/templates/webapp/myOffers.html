@@ -8,19 +8,48 @@
 {% block content %}
 <script>
 	$(document).ready(function(){
-		$('.tabs').tabs();
-	});      
+		$(".tabs").tabs();
+
+		$("#delete-modal").modal({
+            onOpenStart: function(modal, trigger) {
+                // Get the offer ID from the offer-id data attribute of the modal trigger
+                let modalTrigger = $(trigger);
+                let offerId = modalTrigger.data("offer-id");
+
+                // Create a URL for deleting the offer of the form: /webapp/deleteOffer/<offerId>
+                // Have to use this replace workaround (from https://stackoverflow.com/a/37311391/3806231) since offer ID is stored in a variable in JS not Python
+                let deleteUrl = "{% url 'webapp:deleteOffer' 0 %}".replace("0", offerId);
+
+                // Make the Yes button point to the delete offer URL
+                let yesButton = $(modal).find("#delete-button");
+                yesButton.attr("href", deleteUrl);
+            }
+		});
+	});
 </script>
-<div class = "container"> 
+
+<!-- Modal Structure -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h4>Delete Confirmation</h4>
+        <p>Are you sure you wish to delete this offer?</p>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect waves-green btn-flat">No</a>
+        <a id="delete-button" class="waves-effect waves-green btn-flat">Yes</a>
+    </div>
+</div>
+
+<div class = "container">
 	<div class="row">
 		<div class="col s12">
 			<ul class="tabs">
-				<li class="tab col s4"><a href="#test1">Buying Offers</a></li>
-				<li class="tab col s4"><a href="#test2">Selling Offers</a></li>
-				<li class="tab col s4"><a href="#test4">Completed Offers</a></li>
+				<li class="tab col s4"><a href="#buying-offers">Buying Offers</a></li>
+				<li class="tab col s4"><a href="#selling-offers">Selling Offers</a></li>
+				<li class="tab col s4"><a href="#completed-offers">Completed Offers</a></li>
 			</ul>
 		</div>
-		<div id="test1" class="col s12" >
+		<div id="buying-offers" class="col s12" >
 			{% if buy_offers.first is not None %}
 			{% for offer in buy_offers %}
 			<div class="card hoverable blue-grey darken-1">
@@ -33,7 +62,7 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-					<a href="#">Delete Offer</a>
+					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal" data-offer-id="{{ offer.id }}">Delete Offer</a>
 				</div>
 			</div>
 			{% endfor %}
@@ -42,7 +71,7 @@
 			{% endif %}
 			<br>
 		</div>
-		<div id="test2" class="col s12">
+		<div id="selling-offers" class="col s12">
 			{% if sell_offers.first is not None %}
 			{% for offer in sell_offers %}
 			<div class="card hoverable blue-grey darken-1">
@@ -62,9 +91,40 @@
 			{% else %}
 			You have no active sell offers.
 			{% endif %}
-			<br>
+
+            {#  Ethereum Assets #}
+            {% if assets.first is not None %}
+			{% for asset in assets %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ asset.name }}  <span class="new badge grey" data-badge-caption="Ethereum"></span>
+                        {% if asset.transactionStatus == asset.SUCCESS %}
+                        <span class="new badge green" data-badge-caption="Success"></span>
+                        {% elif asset.transactionStatus == asset.FAIL %}
+                        <span class="new badge red" data-badge-caption="Fail"></span>
+                        {% else %}
+                        <span class="new badge grey" data-badge-caption="Submitted"></span>
+                        {% endif %}
+                    </span>
+{#					<p>Generated ID: {{ asset.generatedId }}</p>#}
+{#                    <p>Address: {{ asset.assetAddress }}</p>#}
+{#					<p>Status: {{ asset.transactionStatus }} </p>#}
+					<p>Carrier: {{ asset.carrier.username }}</p>
+                    <p>Price: {{ asset.price }} Wei</p>
+                    <p>Current stock: {{ asset.stock }}</p>
+				</div>
+                <div class="card-action">
+					<a href="#">Details</a>
+					<a href="#">Edit Asset</a>
+					<a href="#">Delete Asset</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no Ethereum assets.
+			{% endif %}
 		</div>
-		<div id="test4" class="col s12">
+		<div id="completed-offers" class="col s12">
 			{% if completed_offers.first is not None %}
 			{% for offer in completed_offers %}
 			<div class="card hoverable blue-grey darken-1">
@@ -78,12 +138,46 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 				</div>
-			</div>			
+			</div>
 			{% endfor %}
 			{% else %}
 			You have no completed offers.
 			{% endif %}
-			
+
+            {#  Ethereum Assets #}
+            {% if records.first is not None %}
+                <br>
+                Ethereum assets owned:
+			{% for record in records %}
+			<div class="card hoverable blue-grey darken-1">
+				<div class="card-content white-text">
+					<span class="card-title">{{ record.asset.name }}
+                    {% if record.status == record.CONFIRMED %}
+                        <span class="new badge green" data-badge-caption="Confirmed"></span>
+                        {% elif record.status == record.TXFAILED %}
+                        <span class="new badge red" data-badge-caption="Failed"></span>
+                        {% elif record.status == record.TRANSIT %}
+                        <span class="new badge blue" data-badge-caption="In Transit"></span>
+                        {% elif record.status == record.DELIVERED %}
+                        <span class="new badge orange" data-badge-caption="Delivered"></span>
+                        {% else %}
+                        <span class="new badge grey" data-badge-caption="Processing"></span>
+                    {% endif %}
+                    </span>
+                    <p>Record code: {{ record.generatedId }}</p>
+					<p>Amount: {{ record.amount }}</p>
+					<p>ETH Owed (Wei): {{ record.owed }} </p>
+				</div>
+				<div class="card-action">
+					<a href="{% url 'webapp:recordDetails' record.id %}">Details</a>
+					<a href="#">Delete Record</a>
+				</div>
+			</div>
+			{% endfor %}
+			{% else %}
+			You have no bought assets.
+			{% endif %}
+			<br>
 		</div>
 	</div>
 </div>
