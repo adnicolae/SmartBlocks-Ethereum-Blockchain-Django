@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block content %}
-<a href="{% url 'webapp:changeWallet' %}">Change Wallet</a>
-
-<a href="{% url 'webapp:changePassword' %}">Change Password</a>
-
-<a href="{% url 'webapp:changeUsername' %}">Change Username</a>
+<div class="collection">
+    <a href="{% url 'webapp:changeWallet' %}" class="collection-item">Change wallet</a>
+    <a href="{% url 'webapp:changePassword' %}" class="collection-item">Change password</a>
+    <a href="{% url 'webapp:changeUsername' %}" class="collection-item">Change username</a>
+</div>
 {% endblock %}
