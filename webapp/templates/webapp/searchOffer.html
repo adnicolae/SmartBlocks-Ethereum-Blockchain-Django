@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<a href ="{% url 'webapp:searchOfferAdvance' %}" class="waves-effect waves-light btn">Switch to Advanced Mode</a>
+<a href ="{% url 'webapp:searchOfferAdvanced' %}" class="waves-effect waves-light btn">Switch to Advanced Mode</a>
 <form method="post">
   <div class="container">
 {% csrf_token %}

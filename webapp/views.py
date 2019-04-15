@@ -359,7 +359,7 @@ def searchOffer(request):
 		noMatch = 0
 	return render(request,'webapp/searchOffer.html',{'form':form,'offers':offers,'noMatch':noMatch})
 	
-def searchOfferAdvance(request):
+def searchOfferAdvanced(request):
 	if request.method == 'POST':
 		form = SearchOfferFormAdvance(request.POST)
 		if form.is_valid():
@@ -388,7 +388,7 @@ def searchOfferAdvance(request):
 		form = SearchOfferFormAdvance()
 		offers = None
 		noMatch = 0
-	return render(request,'webapp/searchOfferAdvance.html',{'form':form,'offers':offers,'noMatch':noMatch})
+	return render(request, 'webapp/searchOfferAdvanced.html', {'form':form, 'offers':offers, 'noMatch':noMatch})
 @login_required
 def mySmartBlocks(request):
     return render(request, 'webapp/mySmartBlocks.html')
