@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-<a href ="{% url 'webapp:searchOffer' %}" class="waves-effect waves-light btn">Switch to Simple Mode</a>
+<a href ="{% url 'webapp:searchOffers' %}" class="waves-effect waves-light btn">Switch to Simple Mode</a>
 <form method="post">
   <div class="container">
 {% csrf_token %}

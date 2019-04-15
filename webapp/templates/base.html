@@ -18,7 +18,7 @@
 	<ul class="right hide-on-med-and-down">
 		<!-- Dropdown Trigger -->
 		<li><a href="{% url 'webapp:mySmartBlocks' %}"><i class="large material-icons left ">dashboard</i><span>Dashboard</span></a></li>
-		<li><a href="{% url 'webapp:searchOffer' %}"><i class="large material-icons left">search</i><span>Search</span></a></li>
+		<li><a href="{% url 'webapp:searchOffers' %}"><i class="large material-icons left">search</i><span>Search</span></a></li>
 		<li><a class='dropdown-trigger' data-target='dropdown1'><i class="large material-icons left">description</i><span>Contracts</span></a></li>
 		{% if user.is_authenticated %}
 		<li><a class='dropdown-trigger' data-target='dropdown2'><i class="large material-icons left">account_circle</i><span>Account</span></a></li>
@@ -51,7 +51,7 @@
 		<li class="no-padding">
 			<li class="light-blue darken-4" style="height:64px;" ></li>
 			<li><a href="{% url 'webapp:mySmartBlocks' %}"><i class="small material-icons left ">dashboard</i><span>Dashboard</span></a></li>
-			<li><a href="{% url 'webapp:searchOffer' %}"><i class="small material-icons left">search</i><span>Search</span></a></li>
+			<li><a href="{% url 'webapp:searchOffers' %}"><i class="small material-icons left">search</i><span>Search</span></a></li>
 			<ul class="collapsible collapsible-accordion">
 				<li class="bold">
 					<a class="collapsible-header" style="padding:0 32px;"><i class="large material-icons left">description</i>Contracts</a>
@@ -62,7 +62,7 @@
                             <li><a href="{% url 'webapp:createAsset' %}">Create Asset</a></li>
 							<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
                             <li><a href="{% url 'webapp:myAssets' %}">My Assets</a></li>
-							<li><a href="{% url 'webapp:searchOffer' %}">Search for Offers</a></li>
+							<li><a href="{% url 'webapp:searchOffers' %}">Search for Offers</a></li>
 							<li class="divider" tabindex="-1"></li>
 						</ul>     
 					</div>

@@ -326,7 +326,7 @@ def matchOffer(request, offer_id):
 	sortedoffers = sorted(offers,key = lambda x: min(myoffer.quantity,x.quantity)/max(myoffer.quantity,x.quantity) + min(myoffer.price/myoffer.quantity,x.price/x.quantity)/max(myoffer.price/myoffer.quantity,x.price/x.quantity),reverse = True)[:10]
 	return render(request,'webapp/matchOffer.html',{'sortedoffers':sortedoffers,'myoffer':myoffer})
 
-def searchOffer(request):
+def searchOffers(request):
 	if request.method == 'POST':
 		form = SearchOfferForm(request.POST)
 		if form.is_valid():
@@ -357,9 +357,9 @@ def searchOffer(request):
 		form = SearchOfferForm()
 		offers = None
 		noMatch = 0
-	return render(request,'webapp/searchOffer.html',{'form':form,'offers':offers,'noMatch':noMatch})
+	return render(request,'webapp/searchOffers.html',{'form':form,'offers':offers,'noMatch':noMatch})
 	
-def searchOfferAdvanced(request):
+def searchOffersAdvanced(request):
 	if request.method == 'POST':
 		form = SearchOfferFormAdvance(request.POST)
 		if form.is_valid():
@@ -388,7 +388,7 @@ def searchOfferAdvanced(request):
 		form = SearchOfferFormAdvance()
 		offers = None
 		noMatch = 0
-	return render(request, 'webapp/searchOfferAdvanced.html', {'form':form, 'offers':offers, 'noMatch':noMatch})
+	return render(request, 'webapp/searchOffersAdvanced.html', {'form':form, 'offers':offers, 'noMatch':noMatch})
 @login_required
 def mySmartBlocks(request):
     return render(request, 'webapp/mySmartBlocks.html')
