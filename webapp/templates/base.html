@@ -23,7 +23,7 @@
 		{% if user.is_authenticated %}
 		<li><a class='dropdown-trigger' data-target='dropdown2'><i class="large material-icons left">account_circle</i><span>Account</span></a></li>
 		{% else %}
-		</li>Not logged in</li>
+        <li><a href="{% url 'webapp:login_view' %}"><i class="large material-icons left">account_circle</i><span>Not logged in</span></a></li>
 		{% endif %}
 		<!-- Dropdown Structure -->
 		<ul style="min-width:150px" id='dropdown1' class='dropdown-content'>
@@ -87,7 +87,8 @@
 			</ul>		
 		</li>
 		{% else %}
-		</li>Not logged in</li>
+        <li><div class="divider"></div></li>
+        <li><a href="{% url 'webapp:login_view' %}"><i class="small material-icons left ">account_circle</i><span>Not logged in</span></a></li>
 		{% endif %}
 	</ul>
 
