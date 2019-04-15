@@ -155,7 +155,7 @@ def register(request):
             auth.login(request, user)
             toastHTML = '<span>Registered successfully!</span>'
             messages.success(request, toastHTML)
-            return redirect('webapp:mySmartBlocks')
+            return redirect('webapp:dashboard')
     else:
         form = SignupForm()
     return render(request, 'webapp/register.html', {'form': form})
@@ -390,8 +390,8 @@ def searchOffersAdvanced(request):
 		noMatch = 0
 	return render(request, 'webapp/searchOffersAdvanced.html', {'form':form, 'offers':offers, 'noMatch':noMatch})
 @login_required
-def mySmartBlocks(request):
-    return render(request, 'webapp/mySmartBlocks.html')
+def dashboard(request):
+    return render(request, 'webapp/dashboard.html')
 
 def about(request):
     return render(request, 'webapp/about.html')
@@ -405,7 +405,7 @@ def changePassword(request):
 			user = form.save()
 			update_session_auth_hash(request,user)
 			messages.success(request,'Your password was updated')
-			return redirect('webapp:accountSetting')
+			return redirect('webapp:settings')
 		else:
 			messages.error(request,'Error')
 	else:
@@ -423,7 +423,7 @@ def changeUsername(request):
 				newusername = form.cleaned_data['newusername']
 				user.username = newusername
 				user.save()
-				return redirect('webapp:accountSetting')
+				return redirect('webapp:settings')
 			else:
 				messages.error(request,'Wrong Password')
 		else:
@@ -440,7 +440,7 @@ def changeWallet(request):
 			wallet = form.save()
 			wallet.ether_balance = SolidityHelper.getBalance(wallet.wallet_address)
 			wallet.save()
-			return redirect('webapp:mySmartBlocks')
+			return redirect('webapp:dashboard')
 		else:
 			messages.error(request, "Wrong address.")
 	else:
@@ -448,5 +448,5 @@ def changeWallet(request):
 	return render(request, 'webapp/changeWallet.html', {'form': form})
 
 @login_required
-def accountSetting(request):
-	return render(request, 'webapp/accountSetting.html')
+def settings(request):
+	return render(request, 'webapp/settings.html')
