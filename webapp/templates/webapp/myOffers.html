@@ -23,6 +23,13 @@
                 // Make the Yes button point to the delete offer URL
                 let yesButton = $(modal).find("#delete-button");
                 yesButton.attr("href", deleteUrl);
+
+                // Get the asset name from the asset-name data attribute of the modal trigger
+                let assetName = modalTrigger.data("asset-name");
+
+                // Set the text of the asset name <span> element to the asset name
+                let assetNameSpan = $(modal).find("#asset-name-span");
+                assetNameSpan.text(assetName);
             }
 		});
 	});
@@ -32,7 +39,7 @@
 <div id="delete-modal" class="modal">
     <div class="modal-content">
         <h4>Delete Confirmation</h4>
-        <p>Are you sure you wish to delete this offer?</p>
+        <p>Are you sure you wish to delete your offer for the asset "<span id="asset-name-span"></span>"? This action cannot be undone.</p>
     </div>
     <div class="modal-footer">
         <a class="modal-close waves-effect waves-green btn-flat">No</a>
@@ -62,7 +69,8 @@
 				<div class="card-action">
 					<a href="{% url 'webapp:details' offer.id %}">Details</a>
 					<a href="{% url 'webapp:changeOffer' offer.id %}">Edit Offer</a>
-					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal" data-offer-id="{{ offer.id }}">Delete Offer</a>
+					<a id="delete-modal-trigger" class="modal-trigger" data-target="delete-modal" href="#delete-modal"
+                       data-offer-id="{{ offer.id }}" data-asset-name="{{ offer.asset_name }}">Delete Offer</a>
 				</div>
 			</div>
 			{% endfor %}
