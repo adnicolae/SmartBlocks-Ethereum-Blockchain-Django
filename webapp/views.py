@@ -138,7 +138,7 @@ def login_view(request):
                 auth.login(request, user)
                 toastHTML = '<span>Logged in successfully!</span>'
                 messages.success(request, toastHTML)
-                return redirect((request.GET.get('next','webapp:mySmartBlocks')))
+                return redirect((request.GET.get('next','webapp:dashboard')))
     else:
         form = UserForm()
     return render(request, 'webapp/login.html', {'form': form})

@@ -121,6 +121,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 LOGIN_URL = '/webapp/login'
 
-LOGIN_REDIRECT_URL = '/webapp/mySmartBlocks'
+LOGIN_REDIRECT_URL = '/webapp/dashboard'
 LOGOUT_REDIRECT_URL =  '/webapp/'
 
