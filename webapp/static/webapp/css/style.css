@@ -58,3 +58,18 @@ body {
 .quantity {
   font-size: 14px;
 }
+
+header {
+    text-align: center;
+}
+
+header > h1 {
+    display: inline-block;
+}
+
+header > .card-panel {
+    position: relative;
+    padding: 10px;
+    top: -10px;
+    margin-left: 10px;
+}
