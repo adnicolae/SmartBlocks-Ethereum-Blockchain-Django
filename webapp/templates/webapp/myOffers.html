@@ -32,6 +32,8 @@
                 assetNameSpan.text(assetName);
             }
 		});
+
+		$('.fixed-action-btn').floatingActionButton();
 	});
 </script>
 
@@ -45,6 +47,12 @@
         <a class="modal-close waves-effect btn-flat">No</a>
         <a id="delete-button" class="waves-effect btn-flat">Yes</a>
     </div>
+</div>
+
+<div class="fixed-action-btn">
+    <a href="{% url 'webapp:createOffer' %}" class="btn-floating btn-large light-blue darken-4">
+        <i class="large material-icons">add</i>
+    </a>
 </div>
 
 <div class = "container">

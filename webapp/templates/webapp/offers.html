@@ -6,6 +6,17 @@
 {% endblock %}
 
 {% block content %}
+<script>
+	$(document).ready(function(){
+		$('.fixed-action-btn').floatingActionButton();
+	});
+</script>
+
+<div class="fixed-action-btn">
+    <a href="{% url 'webapp:createOffer' %}" class="btn-floating btn-large light-blue darken-4">
+        <i class="large material-icons">add</i>
+    </a>
+</div>
 
 <div class="row">
 <div class="col s12">
