@@ -266,7 +266,7 @@ def createOffer(request):
             offer.save()
             
             detailsURL = reverse('webapp:details', args=[offer.id])
-            toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action" href="{}">View</a>'.format(detailsURL);
+            toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action waves-effect waves-light white-text" href="{}">View</a>'.format(detailsURL);
             
             messages.success(request, toastHTML)
             return redirect('webapp:myOffers')

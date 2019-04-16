@@ -2,7 +2,7 @@
 
 {% block title %}Offer{% endblock %}
 {% block header %}
-      <h1 class="header center blue-text">Offer to {{offer.contract_type}} Contract {{ offer.id }}</h1>
+      <h1 class="header center light-blue-text text-darken-4">Offer to {{offer.contract_type}} Contract {{ offer.id }}</h1>
 {% endblock %}
 
 {% block content %}
@@ -15,6 +15,6 @@ Seller: {{ offer.seller }}
 Asset Name: {{ offer.asset_name }} <br>
 Quantity: {{ offer.quantity }} {{ offer.unit }} <br>
 Price {{ offer.price }} {{ offer.currency }} <br></br>
-<a class="btn" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br> 
-<a class="btn" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
+<a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br>
+<a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
 {% endblock %}

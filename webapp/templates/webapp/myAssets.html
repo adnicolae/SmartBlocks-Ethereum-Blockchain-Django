@@ -2,7 +2,7 @@
 
 {% block title %}My Assets{% endblock %}
 {% block header %}
-      <h1 class="header center blue-text">My Assets</h1>
+      <h1 class="header center light-blue-text text-darken-4">My Assets</h1>
 {% endblock %}
 
 {% block content %}
@@ -22,7 +22,7 @@
 		<div id="created_assets" class="col s12">
 			{% if owned_assets.first is not None %}
 			{% for asset in owned_assets %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ asset.asset_name }}</span>
 					<p>Generated ID: {{ asset.generatedId }}</p>
@@ -48,7 +48,7 @@
     		<div id="bought_assets" class="col s12">
 			{% if records.first is not None %}
 			{% for record in records %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ record.assetAddress }}</span>
 					<p>Amount: {{ record.amount }}</p>

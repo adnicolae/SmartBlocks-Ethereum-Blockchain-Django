@@ -27,18 +27,18 @@
 		{% endif %}
 		<!-- Dropdown Structure -->
 		<ul style="min-width:150px" id='dropdown1' class='dropdown-content'>
-			<li><a href="{% url 'webapp:offers' %}">View Offers</a></li>
-			<li><a href="{% url 'webapp:createOffer' %}">Create Offer</a></li>
-            <li><a href="{% url 'webapp:createAsset' %}">Create Asset</a></li>
-			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>        
+			<li><a href="{% url 'webapp:offers' %}" class="waves-effect light-blue-text text-darken-4">View Offers</a></li>
+			<li><a href="{% url 'webapp:createOffer' %}" class="waves-effect light-blue-text text-darken-4">Create Offer</a></li>
+            <li><a href="{% url 'webapp:createAsset' %}" class="waves-effect light-blue-text text-darken-4">Create Asset</a></li>
+			<li><a href="{% url 'webapp:myOffers' %}" class="waves-effect light-blue-text text-darken-4">My Offers</a></li>
 		</ul>          
 		<ul style="min-width:200px;" id='dropdown2' class='dropdown-content'>
-			<li><a href="{% url 'webapp:offers' %}"><p>Hello, {{ request.user.first_name }}<br>{{ request.user }}</p></a></li>
+			<li><a href="{% url 'webapp:offers' %}" class="waves-effect light-blue-text text-darken-4"><p>Hello, {{ request.user.first_name }}<br>{{ request.user }}</p></a></li>
 			<li class="divider" tabindex="-1"></li>
-			<li><a href="{% url 'webapp:myOffers' %}">My Offers</a></li>
-            <li><a href="{% url 'webapp:myAssets' %}">My Assets</a></li>
-            <li><a href="{% url 'webapp:logout_view' %}">Sign Out</a></li>
-			<li><a href="{% url 'webapp:settings' %}">Settings</a></li>
+			<li><a href="{% url 'webapp:myOffers' %}" class="waves-effect light-blue-text text-darken-4">My Offers</a></li>
+            <li><a href="{% url 'webapp:myAssets' %}" class="waves-effect light-blue-text text-darken-4">My Assets</a></li>
+            <li><a href="{% url 'webapp:logout_view' %}" class="waves-effect light-blue-text text-darken-4">Sign Out</a></li>
+			<li><a href="{% url 'webapp:settings' %}" class="waves-effect light-blue-text text-darken-4">Settings</a></li>
 		</ul>     
 
 	
@@ -118,7 +118,7 @@
         <script>
         {% for message in messages %}
         {% autoescape off%}
-        M.toast({html: '{{ message }}', classes:"blue"});
+        M.toast({html: '{{ message }}', classes:"light-blue darken-4"});
         {% endautoescape %}
         {% endfor %}
         </script>

@@ -3,7 +3,7 @@
 {% block title %}Search{% endblock %}
 {% block header %}
     <header>
-        <h1 class="header center blue-text">
+        <h1 class="header center light-blue-text text-darken-4">
             Search Offers
         </h1>
         <span class="card-panel grey">
@@ -13,13 +13,13 @@
 {% endblock %}
 
 {% block content %}
-<a href ="{% url 'webapp:searchOffers' %}" class="waves-effect waves-light btn">Switch to Simple Mode</a>
+<a href ="{% url 'webapp:searchOffers' %}" class="waves-effect waves-light btn light-blue darken-4">Switch to Simple Mode</a>
 <form method="post">
   <div class="container">
 {% csrf_token %}
 {{form}}
     <center>
-   <button class="btn waves-effect waves-light" type="submit">Search
+   <button class="btn waves-effect waves-light light-blue darken-4" type="submit">Search
     <i class="material-icons right">send</i>
   </button>
   </center>
@@ -45,7 +45,7 @@ No match found
 	<td>{{offer.contract_type}}</td> 
 	<td>{{offer.buyer}}</td> 
 	<td>{{offer.seller}}</td> 
-	<td><a class="btn" href="{% url 'webapp:details' offer.id %}">More details</a></td> 
+	<td><a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:details' offer.id %}">More details</a></td>
 	</tr>
 {% endfor %}
 </table>

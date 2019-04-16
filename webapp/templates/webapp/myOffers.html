@@ -2,7 +2,7 @@
 
 {% block title %}My Offers{% endblock %}
 {% block header %}
-      <h1 class="header center blue-text">My Offers</h1>
+      <h1 class="header center light-blue-text text-darken-4">My Offers</h1>
 {% endblock %}
 
 {% block content %}
@@ -42,8 +42,8 @@
         <p>Are you sure you wish to delete your offer for the asset "<span id="asset-name-span"></span>"? This action cannot be undone.</p>
     </div>
     <div class="modal-footer">
-        <a class="modal-close waves-effect waves-green btn-flat">No</a>
-        <a id="delete-button" class="waves-effect waves-green btn-flat">Yes</a>
+        <a class="modal-close waves-effect btn-flat">No</a>
+        <a id="delete-button" class="waves-effect btn-flat">Yes</a>
     </div>
 </div>
 
@@ -59,7 +59,7 @@
 		<div id="buying-offers" class="col s12" >
 			{% if buy_offers.first is not None %}
 			{% for offer in buy_offers %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>
@@ -82,7 +82,7 @@
 		<div id="selling-offers" class="col s12">
 			{% if sell_offers.first is not None %}
 			{% for offer in sell_offers %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>
@@ -103,7 +103,7 @@
             {#  Ethereum Assets #}
             {% if assets.first is not None %}
 			{% for asset in assets %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ asset.name }}  <span class="new badge grey" data-badge-caption="Ethereum"></span>
                         {% if asset.transactionStatus == asset.SUCCESS %}
@@ -135,7 +135,7 @@
 		<div id="completed-offers" class="col s12">
 			{% if completed_offers.first is not None %}
 			{% for offer in completed_offers %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ offer.asset_name }}</span>
 					<p>{{ offer.completion_condition }}</p>
@@ -157,7 +157,7 @@
                 <br>
                 Ethereum assets owned:
 			{% for record in records %}
-			<div class="card hoverable blue-grey darken-1">
+			<div class="card hoverable light-blue darken-4">
 				<div class="card-content white-text">
 					<span class="card-title">{{ record.asset.name }}
                     {% if record.status == record.CONFIRMED %}

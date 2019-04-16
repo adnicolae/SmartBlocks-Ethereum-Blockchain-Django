@@ -2,13 +2,13 @@
 
 {% block title %}Settings{% endblock %}
 {% block header %}
-      <h1 class="header center blue-text">Settings</h1>
+      <h1 class="header center light-blue-text text-darken-4">Settings</h1>
 {% endblock %}
 
 {% block content %}
 <div class="collection">
-    <a href="{% url 'webapp:changeWallet' %}" class="collection-item">Change wallet</a>
-    <a href="{% url 'webapp:changePassword' %}" class="collection-item">Change password</a>
-    <a href="{% url 'webapp:changeUsername' %}" class="collection-item">Change username</a>
+    <a href="{% url 'webapp:changeWallet' %}" class="collection-item waves-effect light-blue-text text-darken-4">Change wallet</a>
+    <a href="{% url 'webapp:changePassword' %}" class="collection-item waves-effect light-blue-text text-darken-4">Change password</a>
+    <a href="{% url 'webapp:changeUsername' %}" class="collection-item waves-effect light-blue-text text-darken-4">Change username</a>
 </div>
 {% endblock %}

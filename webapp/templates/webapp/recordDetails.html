@@ -3,7 +3,7 @@
 {% block title %}Record Information{% endblock %}
 
 {% block header %}
-      <h1 class="header center blue-text">Record Details</h1>
+      <h1 class="header center light-blue-text text-darken-4">Record Details</h1>
 {% endblock %}
 
 {% block content %}
@@ -13,5 +13,5 @@
     Scan the following QR Code to check the transfer status: <br>
     {% autoescape off %}{{ qr_code }}{% endautoescape %} <br>
 
-<a class="btn" href="{% url 'webapp:myOffers' %}">Back to all offers</a><br>
+<a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:myOffers' %}">Back to all offers</a><br>
 {% endblock %}
