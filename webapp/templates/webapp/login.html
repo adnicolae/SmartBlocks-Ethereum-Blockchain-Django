@@ -9,11 +9,13 @@
 {% csrf_token %}
 {{ form.as_p }}
     <center>
-   <button class="btn waves-effect waves-light light-blue darken-4" type="submit">Login
-    <i class="material-icons right">send</i>
-  </button>
-  <br><br>
-  <a href="{% url 'webapp:register' %}">Register</a>
+        <button class="btn waves-effect waves-light light-blue darken-4" type="submit">Login
+            <i class="material-icons right">send</i>
+        </button>
+        <br>
+        <br>
+        <a href="{% url 'webapp:register' %}">Register</a>
+    </center>
 </div>
 </form>
 {% endblock %}
