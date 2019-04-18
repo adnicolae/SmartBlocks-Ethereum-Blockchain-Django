@@ -215,7 +215,9 @@ def createOffer(request):
                 priority = 'buyer'
         
             clause = parseString(form.cleaned_data.get('completion_condition'))
-                    
+            if clause is None:
+                form.add_error('completion_condition', 'Invalid clause')
+                return render(request, 'webapp/createOffer.html', {'form': form})
             index = 0
             strBounds = ""
             for bounds in clause.bounds:

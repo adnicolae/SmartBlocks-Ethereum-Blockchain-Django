@@ -110,6 +110,10 @@ def parse(inputString, v=0):
         print("Input String: ", inputString)
 
     inputString = inputString.replace(' ', '')
+    
+    for c in inputString:
+        if c not in ['+','/','p','q','<','=','>','(',')','1','2','3','4','5','6','7','8','9','0']:
+            return None #error in input string
 
     #Expression regex: [pq][<=>][\d]+([.][\d]+)?
     #Clause regex: [(]?[ec][\d]+[+/][ec][\d]+[)]?
@@ -120,7 +124,7 @@ def parse(inputString, v=0):
     index = 0
     for e in allExpr:
         expressions.append(Expression(e[0],e[1],float(e[2:])))
-        inputString = inputString.replace(e,"e{}".format(index))
+        inputString = inputString.replace(e,"e{}".format(index), 1)
         index+=1
 
     if(v==1):
@@ -137,7 +141,6 @@ def parse(inputString, v=0):
             right = exprInClause[1]
             if(v==1):
                 print(left, op[0], right)
-            
             if(left[0]=="e"):
                 left = expressions[int(float(left[1:]))]
             elif(left[0]=="c"):
@@ -149,11 +152,13 @@ def parse(inputString, v=0):
                 right = clauses[int(float(right[1:]))]
                 
             clauses.append(Clause(left, op[0], right))
-            inputString = inputString.replace(c,"c{}".format(index))
+            inputString = inputString.replace(c,"c{}".format(index), 1)
             index+=1
             
         if(v==1):
             print("Input String: ", inputString)
         allClauses = re.findall('[(]?[ec][\d]+[+/][ec][\d]+[)]?', inputString)
     
+    if(len(clauses) == 0 or len(clauses) < len(expressions) - 1):
+        return None
     return clauses[len(clauses)-1]
