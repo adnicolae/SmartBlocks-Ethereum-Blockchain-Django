@@ -20,7 +20,7 @@ from django.forms.models import model_to_dict
 
 from .matcher import match, parseString
 
-#from webapp.solidity import SolidityHelper
+from webapp.solidity import SolidityHelper
 
 import json
 
