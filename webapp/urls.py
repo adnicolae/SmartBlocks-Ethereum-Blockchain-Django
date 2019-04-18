@@ -27,5 +27,6 @@ urlpatterns = [
 	path('offers/change/<int:offer_id>', views.changeOffer, name='changeOffer'),
 	path('offers/delete/<int:offer_id>', views.deleteOffer, name='deleteOffer'),
 	path('search-simple/', views.searchOffers, name='searchOffers'),
-	path('search-advanced/', views.searchOffersAdvanced, name='searchOffersAdvanced')
+	path('search-advanced/', views.searchOffersAdvanced, name='searchOffersAdvanced'),
+	path('contracts/',views.contractsHub, name ='contractsHub' )
 ]

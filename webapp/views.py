@@ -462,3 +462,6 @@ def changeWallet(request):
 @login_required
 def settings(request):
 	return render(request, 'webapp/settings.html')
+
+def contractsHub(request):
+	return render(request, 'webapp/contractsHub.html')
