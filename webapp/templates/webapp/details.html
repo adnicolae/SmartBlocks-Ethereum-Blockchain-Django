@@ -10,14 +10,23 @@
 			<div class="nav-wrapper ">
 				<div class="col s12 ">
 					<a href="{% url 'webapp:dashboard' %}" class="breadcrumb"> <i class="material-icons">home</i></a>
+					{% if pageOrigin == 'viewOffer' %}
 					<a href="{% url 'webapp:offers' %}" class="breadcrumb">View Offers</a>
-					<a href="{% url 'webapp:offers' %}" class="breadcrumb">{{offer.contract_type}} Contract {{ offer.id }}</a>
+					{% elif  pageOrigin == 'search' %}
+					<a href="{% url 'webapp:searchOffers' %}" class="breadcrumb">Search</a>
+					{% else %}
+					<a href="{% url 'webapp:myOffers' %}" class="breadcrumb">My Offers</a>
+					{% endif %}
+					<a href="#" class="breadcrumb">{{offer.contract_type}} Contract {{ offer.id }}</a>
 				</div>
 			</div>
 		</nav>
 	</div>
 {% endblock %}
 {% block content %}
+
+
+
 {% if offer.contract_type == 'Buy' %}
 Buyer: {{ offer.buyer }}
 {% else %}
@@ -28,5 +37,4 @@ Asset Name: {{ offer.asset_name }} <br>
 Quantity: {{ offer.quantity }} {{ offer.unit }} <br>
 Price {{ offer.price }} {{ offer.currency }} <br></br>
 <a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br>
-<a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
 {% endblock %}

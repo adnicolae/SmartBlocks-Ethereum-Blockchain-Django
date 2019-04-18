@@ -46,7 +46,16 @@
 <span class="by">Buyer: {{ offer.buyer }}</span><br><br>
 <span class="price">Maximum price: {{ b.1 }} {{ offer.currency }}/{{ offer.unit }}</span><br>
 <span class="quantity">Quantity: {{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
-<a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:details' offer.id %}">More details</a>
+
+<form action= "{% url 'webapp:details' offer.id %}" method="post">
+	{% csrf_token %} 
+	<input name="pageOrigin" type="hidden" value="viewOffer">
+	<button style="float: right;" class="btn waves-effect waves-light light-blue darken-4" type="submit">
+		More details
+	</button>
+</form>
+
+
 </div>
 {% endfor %}
 {% endfor %}
@@ -64,7 +73,14 @@ There are no buy offers at this time.
 <span class="by">Seller: {{ offer.seller }}</span><br><br>
 <span class="price">Minimum price: {{ b.0 }} {{ offer.currency }}/{{ offer.unit }}</span><br>
 <span class="quantity">Quantity: {{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
-<a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:details' offer.id %}">More details</a>
+<form action= "{% url 'webapp:details' offer.id %}" method="post">
+	{% csrf_token %} 
+	<input name="pageOrigin" type="hidden" value="viewOffer">
+	<button style="float: right;" class="btn waves-effect waves-light light-blue darken-4" type="submit">
+		More details
+	</button>
+</form>
+
 </div>
 {% endfor %}
 {% endfor %}
@@ -81,6 +97,7 @@ There are no sell offers at this time.
 <span class="by">Asset owner: {{ asset.owner.username }}</span><br><br>
 <span class="price">{{ asset.price }} Wei</span><br>
 <span class="quantity">{{ asset.stock }} units in stock</span>
+
 <a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:assetDetails' asset.id %}">More details</a>
 </div>
 {% endfor %}

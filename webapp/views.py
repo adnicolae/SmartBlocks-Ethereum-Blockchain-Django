@@ -53,10 +53,14 @@ def offers(request):
 
 @login_required
 def details(request, offer_id):
-    offer = Offer.objects.get(pk=offer_id)
-    if(offer is None):
-        return redirect('webapp:offers')
-    return render(request, 'webapp/details.html', {'offer':offer})
+	if request.method == 'POST':
+		pageOrigin = request.POST.get('pageOrigin')
+	else:
+		pageOrigin = None
+	offer = Offer.objects.get(pk=offer_id)
+	if(offer is None):
+		return redirect('webapp:offers')
+	return render(request, 'webapp/details.html', {'offer':offer,'pageOrigin':pageOrigin})
 
 
 @login_required
