@@ -28,10 +28,12 @@ class Offer(models.Model):
     quantity = models.DecimalField(default=0, max_digits=20,decimal_places=4)
     price = models.DecimalField(default=0, max_digits=30, decimal_places=10)
     
+    stock = models.PositiveIntegerField(default=1, null=True)
+    
     BUY = 'Buy'
     SELL = 'Sell'
     CONTRACT_CHOICES = ((BUY, 'BUY'),(SELL, 'SELL'))    
-    contract_type = models.CharField(max_length=4, choices=CONTRACT_CHOICES, default=BUY)
+    contract_type = models.CharField(max_length=4, choices=CONTRACT_CHOICES, default=SELL)
     
     #location = models.CharField(max_length=8)
     #completion_date = models.DateField()
@@ -123,5 +125,5 @@ class WalletForm(forms.ModelForm):
 class OfferCreationForm(ModelForm):
     class Meta:
         model = Offer
-        fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency']
+        fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency', 'stock']
         

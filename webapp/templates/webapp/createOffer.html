@@ -10,12 +10,13 @@
   <div class="container">
 {% csrf_token %}
 {% for field in form %}
-    <div class="fieldWrapper">  
-        {{field.errors}}
-        {% if field.help_text %}
-        <p class="help">{{ field.help_text|safe }}</p>
-        {% endif %}
-        {{ field.label_tag }} {{ field }}
+    {% if field.help_text %}
+    <p class="help">{{ field.help_text|safe }}</p>
+    {% endif %}
+    <div class="input-field" id="{{field.auto_id}}_wrapper">  
+        {{ field }}
+        {{ field.label_tag }}
+        <span class="helper-text" data-error="wrong" data-success="right">{{field.errors}}<span>
     </div>
 {% endfor %}
     <center>
@@ -23,5 +24,12 @@
     <i class="material-icons right">send</i>
   </button>
 </div>
+
+<script>
+document.getElementById("id_contract_type").onchange = function(){
+    document.getElementById("id_stock_wrapper").hidden = (document.getElementById("id_contract_type").value == 'Buy');
+};
+</script>
+
 </form>
 {% endblock %}
