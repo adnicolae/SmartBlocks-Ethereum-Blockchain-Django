@@ -54,9 +54,12 @@ def offers(request):
 @login_required
 def details(request, offer_id):
     offer = Offer.objects.get(pk=offer_id)
+    bounds = offer.bounds.split("|")
+    for i in range(len(bounds)):
+        bounds[i] = bounds[i].split(",")
     if(offer is None):
         return redirect('webapp:offers')
-    return render(request, 'webapp/details.html', {'offer':offer})
+    return render(request, 'webapp/details.html', {'offer':offer, 'bounds':bounds})
 
 
 @login_required
@@ -118,12 +121,16 @@ def assetDetails(request, asset_id):
 def sign(request, offer_id):
     offer = Offer.objects.get(pk=offer_id)
     user = User.objects.get(pk=request.user.id)
+    offer.price = request.POST.get('post_price')
+    offer.quantity = request.POST.get('post_quantity')
     if(offer is None):
         return redirect('webapp:offers')
     if(offer.buyer is None):
         offer.buyer = user
     elif(offer.seller is None):
         offer.seller = user
+    if(offer.buyer is offer.seller):
+        return redirect('webapp:offers')
     offer.save()
     return redirect('webapp:myOffers')
 

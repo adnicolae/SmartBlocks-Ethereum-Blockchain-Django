@@ -9,12 +9,96 @@
 {% if offer.contract_type == 'Buy' %}
 Buyer: {{ offer.buyer }}
 {% else %}
-Seller: {{ offer.seller }}
+Seller: {{ offer.seller }}<br>
+Stock remaining: {{ offer.stock }}
 {% endif %}
 <br>
 Asset Name: {{ offer.asset_name }} <br>
+Condition: {{ offer.completion_condition }} <br>
+{% if offer.price %}
 Quantity: {{ offer.quantity }} {{ offer.unit }} <br>
-Price {{ offer.price }} {{ offer.currency }} <br></br>
-<a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:sign' offer.id %}">Sign Contract</a><br><br>
+Price {{ offer.price }} {{ offer.currency }} <br>
+{% else %}
+{% for b in bounds %}
+{{b.0}} < Price < {{b.1}} <br>
+{{b.2}} < Quantity < {{b.3}} <br><br>
+{%endfor%}
+<br>
+<form method="POST" action="{% url 'webapp:sign' offer.id%}">
+{% csrf_token %}
+<div class="row">
+<div class="input-field col s12 m6">
+<input type="number" name="post_quantity" id="quantity"></input>
+<label for="quantity">Quantity</label>
+</div>
+<div class="col s12 m6">
+{% if offer.contract_type == 'Sell' %}
+Price per item: <span id="ppi">Enter a quantity</span><br>
+Total to pay: <span id="tp">Enter a quantity</span>
+{% else %}
+Price per item: <span id="ppi">Enter a quantity</span><br>
+Total you receive: <span id="tp">Enter a quantity</span>
+{% endif %}
+</div>
+</div>
+<input type="hidden" name="post_price" id="price"></input>
+<input type="submit" class="btn waves-effect waves-light light-blue darken-4" disabled id="sign" value="Sign Contract"></input><br><br>
+</form>
+{%endif%}
 <a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
+
+
+<script>
+function checkBounds(bounds, quantity){
+    limits = bounds.split(",");
+    if(parseInt(quantity) >= limits[2] && parseInt(quantity) <= limits[3]){
+        if("{{offer.seller}}" == "None"){
+            return limits[1];
+        }else{
+            return limits[0];
+        }
+    }
+    return -1;
+}
+
+function checkQuantity () {
+    document.getElementById("sign").disabled = false;
+    var q = document.getElementById("quantity").value;
+    if(q == 0){
+        document.getElementById("ppi").innerHTML = "Enter a quantity";
+        document.getElementById("tp").innerHTML = "Enter a quantity";
+        document.getElementById("sign").classList.add("disabled");
+    }else{
+        var bounds = "{{offer.bounds}}";
+        var split_bounds = bounds.split("|");
+        var i = 0;
+        var low_price = 2**31;
+        var high_price = 0;
+        for(i;i<split_bounds.length;i++){
+            price = checkBounds(split_bounds[i], q);
+            if(price == -1){
+                continue;
+            }
+            low_price = Math.min(low_price, price);
+            high_price = Math.max(high_price, price);
+        }
+        if(high_price < low_price){
+            document.getElementById("ppi").innerHTML = "Quantity does not satisfy condition";
+            document.getElementById("tp").innerHTML = "Quantity does not satisfy condition";
+            document.getElementById("sign").disabled = true;
+        }else if("{{offer.seller}}" == "None"){
+            document.getElementById("ppi").innerHTML = "" + high_price + "{{offer.currency}}";
+            document.getElementById("tp").innerHTML = "" + high_price*q + "{{offer.currency}}";
+            document.getElementById("price").value = high_price;
+        }else{
+            document.getElementById("ppi").innerHTML = "" + low_price + "{{offer.currency}}";
+            document.getElementById("tp").innerHTML = "" + low_price*q + "{{offer.currency}}";
+            document.getElementById("price").value = low_price;
+        }      
+    }
+}
+
+document.getElementById("quantity").onchange = checkQuantity;
+
+</script>
 {% endblock %}
