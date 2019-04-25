@@ -28,7 +28,7 @@ class Offer(models.Model):
     quantity = models.DecimalField(default=0, max_digits=20,decimal_places=4)
     price = models.DecimalField(default=0, max_digits=30, decimal_places=10)
     
-    stock = models.PositiveIntegerField(default=1, null=True)
+    stock = models.DecimalField(default=1, max_digits=20, decimal_places=4)
     
     BUY = 'Buy'
     SELL = 'Sell'

@@ -8,6 +8,7 @@
 {% block content %}
 {% if offer.contract_type == 'Buy' %}
 Buyer: {{ offer.buyer }}
+Number Required: {{ offer.stock }}
 {% else %}
 Seller: {{ offer.seller }}<br>
 Stock remaining: {{ offer.stock }}
@@ -28,7 +29,7 @@ Price {{ offer.price }} {{ offer.currency }} <br>
 {% csrf_token %}
 <div class="row">
 <div class="input-field col s12 m6">
-<input type="number" name="post_quantity" id="quantity"></input>
+<input type="number" name="post_quantity" id="quantity" min="0" max="{{offer.stock}}"></input>
 <label for="quantity">Quantity</label>
 </div>
 <div class="col s12 m6">

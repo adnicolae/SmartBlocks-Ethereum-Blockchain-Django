@@ -27,7 +27,11 @@
 
 <script>
 document.getElementById("id_contract_type").onchange = function(){
-    document.getElementById("id_stock_wrapper").hidden = (document.getElementById("id_contract_type").value == 'Buy');
+    if(document.getElementById("id_contract_type").value == 'Buy'){
+        document.getElementById("id_stock").nextElementSibling.textContent = "Number required:";
+    }else{
+        document.getElementById("id_stock").nextElementSibling.textContent = "Stock:";
+    }
 };
 </script>
 
