@@ -121,17 +121,31 @@ def assetDetails(request, asset_id):
 def sign(request, offer_id):
     offer = Offer.objects.get(pk=offer_id)
     user = User.objects.get(pk=request.user.id)
-    offer.price = request.POST.get('post_price')
-    offer.quantity = request.POST.get('post_quantity')
     if(offer is None):
         return redirect('webapp:offers')
-    if(offer.buyer is None):
-        offer.buyer = user
-    elif(offer.seller is None):
-        offer.seller = user
-    if(offer.buyer is offer.seller):
+    if(offer.buyer is None and offer.seller is user):
         return redirect('webapp:offers')
+    if(offer.seller is None and offer.buyer is user):
+        return redirect('webapp:offers')
+    
+    offer.pk = None
+    offer.stock = float(offer.stock) - float(request.POST.get('post_quantity'))
     offer.save()
+    
+    old_offer = Offer.objects.get(pk=offer_id)
+    old_offer.price = request.POST.get('post_price')
+    old_offer.quantity = request.POST.get('post_quantity')
+    if(old_offer.buyer is None):
+        old_offer.buyer = user
+    elif(old_offer.seller is None):
+        old_offer.seller = user
+        
+    old_offer.save()
+    
+    '''
+    @kabir old_offer also needs to go on the blockchains
+    '''
+        
     return redirect('webapp:myOffers')
 
 def login_view(request):
