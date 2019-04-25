@@ -14,7 +14,11 @@
 <body>
 
 	<nav class="light-blue darken-4" role="navigation">
+	{% if user.is_authenticated %}
+	<div class="nav-wrapper container"><a id="logo-container" href="{% url 'webapp:dashboard' %}" class="brand-logo">SmartBlocks</a>
+	{% else %}
 	<div class="nav-wrapper container"><a id="logo-container" href="{% url 'webapp:index' %}" class="brand-logo">SmartBlocks</a>
+	{% endif %}
 	<ul class="right hide-on-med-and-down">
 		<!-- Dropdown Trigger -->
 		<li><a href="{% url 'webapp:dashboard' %}"><i class="large material-icons left ">dashboard</i><span>Dashboard</span></a></li>
@@ -31,14 +35,16 @@
 			<li><a href="{% url 'webapp:createOffer' %}" class="waves-effect light-blue-text text-darken-4">Create Offer</a></li>
             <li><a href="{% url 'webapp:createAsset' %}" class="waves-effect light-blue-text text-darken-4">Create Asset</a></li>
 			<li><a href="{% url 'webapp:myOffers' %}" class="waves-effect light-blue-text text-darken-4">My Offers</a></li>
+			<li><a href="{% url 'webapp:myAssets' %}" class="waves-effect light-blue-text text-darken-4">My Assets</a></li>
 		</ul>          
 		<ul style="min-width:200px;" id='dropdown2' class='dropdown-content'>
 			<li><a href="{% url 'webapp:offers' %}" class="waves-effect light-blue-text text-darken-4"><p>Hello, {{ request.user.first_name }}<br>{{ request.user }}</p></a></li>
 			<li class="divider" tabindex="-1"></li>
 			<li><a href="{% url 'webapp:myOffers' %}" class="waves-effect light-blue-text text-darken-4">My Offers</a></li>
             <li><a href="{% url 'webapp:myAssets' %}" class="waves-effect light-blue-text text-darken-4">My Assets</a></li>
-            <li><a href="{% url 'webapp:logout_view' %}" class="waves-effect light-blue-text text-darken-4">Sign Out</a></li>
-			<li><a href="{% url 'webapp:settings' %}" class="waves-effect light-blue-text text-darken-4">Settings</a></li>
+            <li><a href="{% url 'webapp:settings' %}" class="waves-effect light-blue-text text-darken-4">Settings</a></li>
+			<li><a href="{% url 'webapp:logout_view' %}" class="waves-effect light-blue-text text-darken-4">Sign Out</a></li>
+			
 		</ul>     
 
 	
@@ -91,14 +97,30 @@
         <li><a href="{% url 'webapp:login_view' %}"><i class="small material-icons left ">account_circle</i><span>Not logged in</span></a></li>
 		{% endif %}
 	</ul>
-
-
+		<style>
+	.breadcrumb:before {
+		color: #212121;
+	}	
+	.breadcrumb {
+		color: #212121;
+	}
+	.breadcrumb:last-child {
+		color: #0d47a1;
+	}
+	.transparentBG {
+	  background: none;
+	  box-shadow: none;
+	}
+	</style>
+	{% block breadcrumbs %}
+	{% endblock %}
 	<div class="section no-pad-bot" id="index-banner">
 		<div class="container">
-			<br><br>
+			
+			
 			{% block header %}
 			{% endblock %}
-			<br><br>
+			<br>
 		</div>
 	</div>
 
@@ -112,6 +134,7 @@
 		});      
 	</script>
 	<div class="container content">
+	
 		{% block content %}
 		{% endblock %}
         {% if messages %}

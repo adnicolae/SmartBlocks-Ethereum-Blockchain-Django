@@ -4,7 +4,25 @@
 {% block header %}
       <h1 class="header center light-blue-text text-darken-4">Offer to {{offer.contract_type}} Contract {{ offer.id }}</h1>
 {% endblock %}
-
+{% block breadcrumbs %}
+	<div class="container style="margin-top: 5px">
+		<nav class="transparentBG z-depth-0 ">
+			<div class="nav-wrapper ">
+				<div class="col s12 ">
+					<a href="{% url 'webapp:dashboard' %}" class="breadcrumb"> <i class="material-icons">home</i></a>
+					{% if pageOrigin == 'viewOffer' %}
+					<a href="{% url 'webapp:offers' %}" class="breadcrumb">View Offers</a>
+					{% elif  pageOrigin == 'search' %}
+					<a href="{% url 'webapp:searchOffers' %}" class="breadcrumb">Search</a>
+					{% else %}
+					<a href="{% url 'webapp:myOffers' %}" class="breadcrumb">My Offers</a>
+					{% endif %}
+					<a href="#" class="breadcrumb">{{offer.contract_type}} Contract {{ offer.id }}</a>
+				</div>
+			</div>
+		</nav>
+	</div>
+{% endblock %}
 {% block content %}
 {% if offer.contract_type == 'Buy' %}
 Buyer: {{ offer.buyer }}

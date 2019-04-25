@@ -53,13 +53,17 @@ def offers(request):
 
 @login_required
 def details(request, offer_id):
+    if request.method == 'POST':
+        pageOrigin = request.POST.get('pageOrigin')
+    else:
+        pageOrigin = None
     offer = Offer.objects.get(pk=offer_id)
     bounds = offer.bounds.split("|")
     for i in range(len(bounds)):
         bounds[i] = bounds[i].split(",")
     if(offer is None):
         return redirect('webapp:offers')
-    return render(request, 'webapp/details.html', {'offer':offer, 'bounds':bounds})
+    return render(request, 'webapp/details.html', {'offer':offer, 'bounds':bounds,'pageOrigin':pageOrigin})
 
 
 @login_required
@@ -360,12 +364,17 @@ def searchOffers(request):
 			offers = []
 			if contract_type == 'Buy':
 				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				priority = 'seller'
 			else:
 				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+				priority = 'buyer'
 			
 			searchCondition = "p ="+ str(price) + "AND q =" + str(quantity)
+			clause = parseString(searchCondition)
 			for m in potential_matches:
-				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+				pot_mat_clause = parseString(m.completion_condition)
+				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				if out is not None:
 					offers.append(m)
 					
 			# If not offers found
@@ -391,12 +400,17 @@ def searchOffersAdvanced(request):
 			offers = []
 			if contract_type == 'Buy':
 				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				priority = 'seller'
 			else:
 				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+				priority = 'buyer'
 			
 			searchCondition = form.cleaned_data['completion_condition']
+			clause = parseString(searchCondition)			
 			for m in potential_matches:
-				if checkMatch(searchCondition, m.completion_condition, 'buyer') is not None:
+				pot_mat_clause = parseString(m.completion_condition)
+				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				if out is not None:
 					offers.append(m)
 					
 			# If not offers found
@@ -473,3 +487,6 @@ def changeWallet(request):
 @login_required
 def settings(request):
 	return render(request, 'webapp/settings.html')
+
+def contractsHub(request):
+	return render(request, 'webapp/contractsHub.html')

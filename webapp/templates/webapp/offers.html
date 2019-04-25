@@ -4,7 +4,18 @@
 {% block header %}
       <h1 class="header center light-blue-text text-darken-4">View Offers</h1>
 {% endblock %}
-
+{% block breadcrumbs %}
+	<div class="container style="margin-top: 5px">
+		<nav class="transparentBG z-depth-0 ">
+			<div class="nav-wrapper ">
+				<div class="col s12 ">
+					<a href="{% url 'webapp:dashboard' %}" class="breadcrumb"> <i class="material-icons">home</i></a>
+					<a href="{% url 'webapp:offers' %}" class="breadcrumb">View Offers</a>
+				</div>
+			</div>
+		</nav>
+	</div>
+{% endblock %}
 {% block content %}
 <script>
 	$(document).ready(function(){
@@ -35,7 +46,16 @@
 <span class="by">Buyer: {{ offer.buyer }}</span><br><br>
 <span class="price">Maximum price: {{ b.1 }} {{ offer.currency }}/{{ offer.unit }}</span><br>
 <span class="quantity">Quantity: {{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
-<a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:details' offer.id %}">More details</a>
+
+<form action= "{% url 'webapp:details' offer.id %}" method="post">
+	{% csrf_token %} 
+	<input name="pageOrigin" type="hidden" value="viewOffer">
+	<button style="float: right;" class="btn waves-effect waves-light light-blue darken-4" type="submit">
+		More details
+	</button>
+</form>
+
+
 </div>
 {% endfor %}
 {% endfor %}
@@ -53,7 +73,14 @@ There are no buy offers at this time.
 <span class="by">Seller: {{ offer.seller }}</span><br><br>
 <span class="price">Minimum price: {{ b.0 }} {{ offer.currency }}/{{ offer.unit }}</span><br>
 <span class="quantity">Quantity: {{ b.2 }}-{{ b.3 }} {{ offer.unit }}</span>
-<a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:details' offer.id %}">More details</a>
+<form action= "{% url 'webapp:details' offer.id %}" method="post">
+	{% csrf_token %} 
+	<input name="pageOrigin" type="hidden" value="viewOffer">
+	<button style="float: right;" class="btn waves-effect waves-light light-blue darken-4" type="submit">
+		More details
+	</button>
+</form>
+
 </div>
 {% endfor %}
 {% endfor %}
@@ -70,6 +97,7 @@ There are no sell offers at this time.
 <span class="by">Asset owner: {{ asset.owner.username }}</span><br><br>
 <span class="price">{{ asset.price }} Wei</span><br>
 <span class="quantity">{{ asset.stock }} units in stock</span>
+
 <a style="float: right;" class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:assetDetails' asset.id %}">More details</a>
 </div>
 {% endfor %}
