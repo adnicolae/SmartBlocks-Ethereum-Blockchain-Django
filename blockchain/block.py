@@ -3,17 +3,17 @@ import hashlib
 
 class Block:
 
-    def __init__(self, index, previousHash, transactions):
+    def __init__(self, index, previousHash, contract, timestamp=None):
         # index of the current block
         self.index = index
         # hash of the previous block
         self.previousHash = previousHash
         # time (and date) the block was created
-        self.timestamp = str(datetime.datetime.now())
-        # transactions are our smart contracts
-        # currently unsure how we will be storing these in the blockchain (JSON?)
-        # can work this out with smart contract team in the future
-        self.transactions = transactions
+        if timestamp == None:
+            self.timestamp = str(datetime.datetime.now())
+        else:
+            self.timestamp = timestamp
+        self.contract = contract
         # hash of the current block
         self.currentHash = self.calculateHash()
 
@@ -26,26 +26,26 @@ class Block:
     def getTimestamp(self):
         return self.timestamp
 
-    def getTransactions(self):
-        return self.transactions
+    def getContract(self):
+        return self.contract
 
     def getHash(self):
         return self.currentHash
 
     def calculateHash(self):
         '''
-        hash is calculated by concatenating the index, previous hash, timestamp and transactions/smart contracts
-        calculate hash (sha256 in this example) of concatenated string
+        hash is calculated by concatenating the index, previous hash, timestamp and smart contract
+        then, calculate hash of concatenated string
         '''
         h = hashlib.sha256()
-        h.update((str(self.index) + self.previousHash + self.timestamp + self.transactions).encode('ASCII'))
+        h.update((str(self.index) + self.previousHash + self.timestamp + self.contract).encode('ASCII'))
         return h.hexdigest()
 
     def printBlock(self):
         print('\n----------\n')
         print('Block ' + str(self.getIndex()) + ':')
         print('Timestamp: ' + self.getTimestamp())
-        print('Transactions: ' + self.getTransactions())
+        print('Contract: ' + self.getContract())
         print('Previous Hash: ' + self.getPreviousHash())
         print('Hash: ' + self.getHash())
         print('\n----------\n')
