@@ -1,11 +1,11 @@
-import block
+from .block import Block
 
 class Blockchain:
 
     def __init__(self, genesisBlock=None):
         # genesisBlock is first block of the chain - can be hard coded
         if genesisBlock == None:
-            self.genesisBlock = block.Block(1, '0', 'Genesis Block')
+            self.genesisBlock = Block(1, '0', 'Genesis Block')
         else:
             self.genesisBlock = genesisBlock
         # store all blocks contained in that chain in a list
