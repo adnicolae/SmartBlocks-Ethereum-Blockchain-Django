@@ -22,6 +22,8 @@ from .matcher import match, parseString
 
 from webapp.solidity import SolidityHelper
 
+from webapp.blockchain import sendContract
+
 import json
 
 from twisted.internet.protocol import Factory, Protocol, ServerFactory, ClientFactory
@@ -146,11 +148,9 @@ def sign(request, offer_id):
         
     old_offer.save()
     
-    d = json.loads(old_offer.write())
+    d = json.dumps(old_offer.write())
     
-    '''
-    @kabir old_offer also needs to go on the blockchains
-    '''
+    sendContract(d)
         
     return redirect('webapp:myOffers')
 
@@ -255,17 +255,6 @@ def createOffer(request):
                 
             offer.bounds = strBounds
             
-            # contract sent to blockchain server
-            # must run server.py to test
-            '''
-            @kabir this is in the wrong place, should run when a match is found
-            
-            jsonContract = offer.write()
-            endpoint = TCP4ClientEndpoint(reactor, "localhost", 64444)
-            connection = connectProtocol(endpoint, SendBlockchainProtocol())
-            connection.addCallback(sendJSON, jsonContract)
-            reactor.run(installSignalHandlers=0)
-            '''
 
             #try to find match
             if form.cleaned_data.get('contract_type') == 'Buy':
@@ -285,9 +274,9 @@ def createOffer(request):
                         offer.buyer = m.buyer
 
                     #creates json serialisation to send to blockchain
-                    d = json.loads(offer.write())
-                    # e.g. blockchain.add(d) goes here
-                    #will also need to add this to
+                    d = json.dumps(offer.write())
+                    
+                    sendContract(d)
 
                     break
 

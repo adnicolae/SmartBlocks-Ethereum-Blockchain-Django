@@ -23,6 +23,8 @@ class SendBlockFactory(ClientFactory):
     def __init__(self, block):
         self.block = block
 
-block1 = 'Oil contract'
-reactor.connectTCP('137.205.112.136', 64444, SendBlockFactory(block1))
-reactor.run()
+def send(contract):
+    reactor.connectTCP('137.205.112.136', 64444, SendBlockFactory(contract))
+    reactor.run()
+
+
