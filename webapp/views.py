@@ -146,6 +146,8 @@ def sign(request, offer_id):
         
     old_offer.save()
     
+    d = json.loads(old_offer.write())
+    
     '''
     @kabir old_offer also needs to go on the blockchains
     '''
