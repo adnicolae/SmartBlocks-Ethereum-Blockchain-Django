@@ -148,9 +148,9 @@ def sign(request, offer_id):
         
     old_offer.save()
     
-    d = json.dumps(old_offer.write())
+    d = old_offer.write()
     
-    sendContract(d)
+    sendContract.send(d)
         
     return redirect('webapp:myOffers')
 
@@ -274,9 +274,9 @@ def createOffer(request):
                         offer.buyer = m.buyer
 
                     #creates json serialisation to send to blockchain
-                    d = json.dumps(offer.write())
+                    d = offer.write()
                     
-                    sendContract(d)
+                    sendContract.send(d)
 
                     break
 

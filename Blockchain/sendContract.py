@@ -1,6 +1,6 @@
 import json
-from .blockchain import Blockchain
-from .block import Block
+from blockchain import Blockchain
+from block import Block
 from twisted.internet.protocol import Factory, Protocol, ServerFactory, ClientFactory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
