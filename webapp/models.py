@@ -7,6 +7,20 @@ from django.dispatch import receiver
 from django.contrib.auth.forms import UserCreationForm
 
 from django import forms
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    public_key = models.CharField(max_length=1674)
+    private_key = models.CharField(max_length=450)
+    
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
     
 class Offer(models.Model):
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="b",null=True)
@@ -34,6 +48,9 @@ class Offer(models.Model):
     SELL = 'Sell'
     CONTRACT_CHOICES = ((BUY, 'BUY'),(SELL, 'SELL'))    
     contract_type = models.CharField(max_length=4, choices=CONTRACT_CHOICES, default=SELL)
+    
+    encrypted_contract_buyer = models.CharField(max_length=256, null=True)
+    encrypted_contract_seller = models.CharField(max_length=256, null=True)
     
     #location = models.CharField(max_length=8)
     #completion_date = models.DateField()

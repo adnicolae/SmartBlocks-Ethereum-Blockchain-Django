@@ -26,6 +26,9 @@ from webapp.blockchain import sendContract
 
 import json
 
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
+
 from twisted.internet.protocol import Factory, Protocol, ServerFactory, ClientFactory
 from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
@@ -149,9 +152,32 @@ def sign(request, offer_id):
     old_offer.save()
     
     d = old_offer.write()
+    b = d.encode('utf-8')
+
+    buyer_pr_key = RSA.import_key(old_offer.buyer.profile.private_key)
+
+    seller_pr_key = RSA.import_key(old_offer.seller.profile.private_key)
+
+    #encrypt d with buyer and seller private keys.
+    cipher_buyer = PKCS1_OAEP.new(key=buyer_pr_key)
+    cipher_text_buyer = cipher_buyer.encrypt(b)
+    cipher_seller = PKCS1_OAEP.new(key=seller_pr_key)
+    cipher_text_seller = cipher_seller.encrypt(b)
+    
+    d = d[:-1] + ', "cipher_buyer" : "{}", "cipher_seller" : "{}"'.format(cipher_text_buyer, cipher_text_seller) + '}'
     
     sendContract.send(d)
-        
+    
+    '''
+    To decrypt message:
+    
+    pu_key = RSA.import_key(old_offer.buyer.profile.public_key)
+    decrypt = PKCS1_OAEP.new(key=pu_key)
+    #Decrypting the message with the PKCS1_OAEP object
+    decrypted_message = decrypt.decrypt(cipher_text_buyer)
+    print(decrypted_message)
+    '''
+
     return redirect('webapp:myOffers')
 
 def login_view(request):
@@ -175,8 +201,22 @@ def register(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
+            
             user.username = user.email
+            
+            user.save()            
+            
+            private_key = RSA.generate(2048)
+            public_key = private_key.publickey()
+            
+            private_pem = private_key.export_key().decode()
+            public_pem = public_key.export_key().decode()
+            
+            user.profile.private_key = public_pem
+            user.profile.public_key = private_pem
+            
             user.save()
+            
             raw_password = form.cleaned_data.get('password1')
             user = auth.authenticate(username=user.username, password=raw_password)
             auth.login(request, user)
@@ -275,6 +315,20 @@ def createOffer(request):
 
                     #creates json serialisation to send to blockchain
                     d = offer.write()
+                    
+                    b = d.encode('utf-8')
+
+                    buyer_pr_key = RSA.import_key(old_offer.buyer.profile.private_key)
+
+                    seller_pr_key = RSA.import_key(old_offer.seller.profile.private_key)
+
+                    #encrypt d with buyer and seller private keys.
+                    cipher_buyer = PKCS1_OAEP.new(key=buyer_pr_key)
+                    cipher_text_buyer = cipher_buyer.encrypt(b)
+                    cipher_seller = PKCS1_OAEP.new(key=seller_pr_key)
+                    cipher_text_seller = cipher_seller.encrypt(b)
+                    
+                    d = d[:-1] + ', "cipher_buyer" : "{}", "cipher_seller" : "{}"'.format(cipher_text_buyer, cipher_text_seller) + '}'
                     
                     sendContract.send(d)
 

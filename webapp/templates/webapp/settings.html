@@ -22,4 +22,5 @@
     <a href="{% url 'webapp:changePassword' %}" class="collection-item waves-effect light-blue-text text-darken-4">Change password</a>
     <a href="{% url 'webapp:changeUsername' %}" class="collection-item waves-effect light-blue-text text-darken-4">Change username</a>
 </div>
+{{request.user.profile.public_key}}
 {% endblock %}
