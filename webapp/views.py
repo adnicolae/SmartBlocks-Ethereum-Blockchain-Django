@@ -172,18 +172,11 @@ def sign(request, offer_id, price=-1, quantity=-1):
     cipher_text_seller = cipher_seller.encrypt(b)
     
     d = d[:-1] + ', "cipher_buyer" : "{}", "cipher_seller" : "{}"'.format(cipher_text_buyer, cipher_text_seller) + '}'
+
+    pu_key_buyer = RSA.import_key(old_offer.buyer.profile.public_key).exportKey()
+    pu_key_seller = RSA.import_key(old_offer.seller.profile.public_key).exportKey()
     
-    sendContract.send(d)
-    
-    '''
-    To decrypt message:
-    
-    pu_key = RSA.import_key(old_offer.buyer.profile.public_key)
-    decrypt = PKCS1_OAEP.new(key=pu_key)
-    #Decrypting the message with the PKCS1_OAEP object
-    decrypted_message = decrypt.decrypt(cipher_text_buyer)
-    print(decrypted_message)
-    '''
+    sendContract.send(d, pu_key_buyer, pu_key_seller, cipher_text_buyer, cipher_text_seller)
 
     return redirect('webapp:myOffers')
 

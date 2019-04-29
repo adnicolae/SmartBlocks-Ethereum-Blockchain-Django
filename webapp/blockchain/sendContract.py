@@ -6,27 +6,31 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
 from twisted.internet import reactor
 
-class SendBlockProtocol(Protocol):
+class SendContractProtocol(Protocol):
 
     def connectionMade(self):
-        message = json.dumps({'type': 'new contract', 'contract': self.factory.block})
+        message = json.dumps({'type': 'new contract', 'contract': self.factory.contract, 'buyer key': self.factory.buyerKey.decode(), 'seller key': self.factory.sellerKey.decode(),
+        'buyer cipher': self.factory.buyerCipher.decode('raw_unicode_escape'), 'seller cipher': self.factory.sellerCipher.decode('raw_unicode_escape')})
         self.transport.write(str.encode(message + '\r\n'))
         self.transport.loseConnection()
 
     def connectionLost(self, reason):
         reactor.crash()
-        print(reactor.running)
 
 
-class SendBlockFactory(ClientFactory):
+class SendContractFactory(ClientFactory):
 
-    protocol = SendBlockProtocol
+    protocol = SendContractProtocol
 
-    def __init__(self, block):
-        self.block = block
+    def __init__(self, contract, buyerKey, sellerKey, buyerCipher, sellerCipher):
+        self.contract = contract
+        self.buyerKey = buyerKey
+        self.sellerKey = sellerKey
+        self.buyerCipher = buyerCipher
+        self.sellerCipher = sellerCipher
 
-def send(contract):
-    reactor.connectTCP('localhost', 64444, SendBlockFactory(contract))
+def send(contract, buyerKey, sellerKey, buyerCipher, sellerCipher):
+    reactor.connectTCP('localhost', 64444, SendContractFactory(contract, buyerKey, sellerKey, buyerCipher, sellerCipher))
     if not reactor.running:
         reactor.run(installSignalHandlers=0)
 
