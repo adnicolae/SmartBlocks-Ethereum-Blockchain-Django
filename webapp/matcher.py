@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from .clauseParser import parse
+from .clauseParser import parse, Bounds
 import sys
 
 def match(buyBounds, sellBounds, priority):
@@ -25,3 +25,12 @@ def overlap(lb1, ub1, lb2, ub2):
     
 def parseString(string):
     return parse(string);
+    
+def strToListOfBounds(string):
+    list_of_bounds = []
+    bounds = string.split("|")
+    for b in bounds:
+        pl,pu,ql,qu = b.split(",")
+        list_of_bounds.append(Bounds(float(pl),float(pu),float(ql),float(qu)))
+    
+    return list_of_bounds

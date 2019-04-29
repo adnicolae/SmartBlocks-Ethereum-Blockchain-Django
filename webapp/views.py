@@ -18,7 +18,7 @@ from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
-from .matcher import match, parseString
+from .matcher import match, parseString, strToListOfBounds
 
 from webapp.solidity import SolidityHelper
 
@@ -127,7 +127,7 @@ def assetDetails(request, asset_id):
 	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
 
 @login_required
-def sign(request, offer_id):
+def sign(request, offer_id, price=-1, quantity=-1):
     offer = Offer.objects.get(pk=offer_id)
     user = User.objects.get(pk=request.user.id)
     if(offer is None):
@@ -138,12 +138,19 @@ def sign(request, offer_id):
         return redirect('webapp:offers')
     
     offer.pk = None
-    offer.stock = float(offer.stock) - float(request.POST.get('post_quantity'))
+    if quantity == -1:
+        offer.stock = float(offer.stock) - float(request.POST.get('post_quantity'))
+    else:
+        offer.stock = float(offer.stock) - quantity
     offer.save()
     
     old_offer = Offer.objects.get(pk=offer_id)
-    old_offer.price = request.POST.get('post_price')
-    old_offer.quantity = request.POST.get('post_quantity')
+    if quantity == -1:
+        old_offer.price = request.POST.get('post_price')
+        old_offer.quantity = request.POST.get('post_quantity')
+    else:
+        old_offer.price = price
+        old_offer.quantity = quantity
     if(old_offer.buyer is None):
         old_offer.buyer = user
     elif(old_offer.seller is None):
@@ -294,7 +301,6 @@ def createOffer(request):
                 index+=1
                 
             offer.bounds = strBounds
-            
 
             #try to find match
             if form.cleaned_data.get('contract_type') == 'Buy':
@@ -302,40 +308,40 @@ def createOffer(request):
             else:
                 potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
 
+            flag = False
+            best_match = (0, 0)
+            best_match_id = -1
+            if priority is 'buyer':
+                best_match = (2**31, 0)
             for m in potential_matches:
-                pot_mat_clause = parseString(m.completion_condition)
-                out = match(clause.bounds, pot_mat_clause.bounds, priority)
+                m_bounds = strToListOfBounds(m.bounds)
+                out = match(clause.bounds, m_bounds, priority)                
                 if out is not None:
-                    #match found, calculate price and quantity to trade at
-                    offer.price, offer.quantity = match(clause.bounds, pot_mat_clause.bounds, priority)
-                    if priority == 'buyer':
-                        offer.seller = m.seller
+                    quant = min(offer.stock, m.stock)
+                    flag = True
+                    if priority is 'buyer':
+                        if best_match[0] > out[0] : #if cheaper, buy
+                            best_match = out
+                            best_match_id = m.id
+                        elif best_match[0] == out[0] and best_match[1] < quant : #same price, more quantity
+                            best_match = out
+                            best_match_id = m.id
                     else:
-                        offer.buyer = m.buyer
-
-                    #creates json serialisation to send to blockchain
-                    d = offer.write()
+                        if best_match[0] < out[0] : #if more expensive, buy
+                            best_match = out
+                            best_match_id = m.id
+                        elif best_match[0] == out[0] and best_match[1] < quant : #same price, more quantity
+                            best_match = out
+                            best_match_id = m.id
                     
-                    b = d.encode('utf-8')
-
-                    buyer_pr_key = RSA.import_key(old_offer.buyer.profile.private_key)
-
-                    seller_pr_key = RSA.import_key(old_offer.seller.profile.private_key)
-
-                    #encrypt d with buyer and seller private keys.
-                    cipher_buyer = PKCS1_OAEP.new(key=buyer_pr_key)
-                    cipher_text_buyer = cipher_buyer.encrypt(b)
-                    cipher_seller = PKCS1_OAEP.new(key=seller_pr_key)
-                    cipher_text_seller = cipher_seller.encrypt(b)
-                    
-                    d = d[:-1] + ', "cipher_buyer" : "{}", "cipher_seller" : "{}"'.format(cipher_text_buyer, cipher_text_seller) + '}'
-                    
-                    sendContract.send(d)
-
-                    break
-
+            offer.stock = float(offer.stock) - best_match[1]
+            if(offer.stock > 0):
+                offer.save()
             print(offer)
-            offer.save()
+            if flag :
+                toastHTML = '<span>Offer created successfully!<br>A match was automatically found!</span>'
+                messages.success(request, toastHTML)
+                return sign(request, best_match_id, best_match[0], best_match[1])
             
             detailsURL = reverse('webapp:details', args=[offer.id])
             toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action waves-effect waves-light white-text" href="{}">View</a>'.format(detailsURL);
