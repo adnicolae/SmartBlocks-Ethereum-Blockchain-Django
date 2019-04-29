@@ -37,7 +37,7 @@ class Blockchain:
         for i in range(1, len(self.chain)):
             if self.validateBlock(self.chain[i]) == False:
                 return False
-        print('Chain Validated')
+        print('Chain Validated. Next validation in 5 minutes.')
         return True
 
     def printBlockchain(self):

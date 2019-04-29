@@ -6,6 +6,11 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
 from twisted.internet import reactor, task
 
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
+
+import codecs
+
 # from sys import stdout
 # from twisted.logger import globalLogBeginner, textFileLogObserver, Logger
 # globalLogBeginner.beginLoggingTo([textFileLogObserver(stdout)])
@@ -88,14 +93,27 @@ class P2PServerProtocol(LineReceiver):
         if self.factory.state == 'READY':
             currentBlock = self.factory.blockchain.getCurrentBlock()
             contract = message['contract']
-            self.factory.newBlock = Block(currentBlock.getIndex() + 1, currentBlock.getHash(), contract)
-            self.factory.state = 'CONSENSUS'
-            self.factory.resetConsensus()
-            self.sendNewBlock(self.factory.newBlock)
+            buyer_cipher = codecs.escape_decode(message['buyer cipher'].encode('raw_unicode_escape'), 'hex')[0]
+            buyer_key = message['buyer key'].encode()
+            seller_cipher = codecs.escape_decode(message['seller cipher'].encode('raw_unicode_escape'), 'hex')[0]
+            seller_key = message['seller key'].encode()
+            if self.checkMessage(buyer_key, buyer_cipher, contract) and self.checkMessage(seller_key, seller_cipher, contract):
+                self.factory.newBlock = Block(currentBlock.getIndex() + 1, currentBlock.getHash(), contract)
+                self.factory.state = 'CONSENSUS'
+                print('state: Consensus')
+                self.factory.resetConsensus()
+                self.sendNewBlock(self.factory.newBlock)
         else:
             self.factory.contractsWaiting.append(message['contract'])
         self.blockSender = True
         self.transport.loseConnection()
+
+    def checkMessage(self, key, cipher, contract):
+        key = RSA.importKey(key)
+        decrypt = PKCS1_OAEP.new(key=key)
+        decrypted_message = decrypt.decrypt(cipher)
+        original_message = contract.split(', "cipher_buyer"')[0] + '}'
+        return decrypted_message.decode() == original_message
 
     def sendNewBlock(self, newBlock):
         message = json.dumps({'type': 'new block', 'index': str(newBlock.getIndex()), 'previous hash': newBlock.getPreviousHash(), 'timestamp': newBlock.getTimestamp(), 'contract': newBlock.getContract(), 'hash': newBlock.getHash()})
@@ -122,7 +140,6 @@ class P2PServerProtocol(LineReceiver):
             self.factory.replies['no'] += 1
         if self.factory.replies['yes'] + self.factory.replies['no'] == self.factory.target:
             self.factory.resend.cancel()
-            print('Cancelled')
             self.factory.consensus()
 
 class P2PServerFactory(Factory):
@@ -142,11 +159,12 @@ class P2PServerFactory(Factory):
         self.target = 0
         self.newBlock = None
         self.validateLoop = task.LoopingCall(self.blockchain.validateChain)
-        self.validateLoop.start(10)
+        self.validateLoop.start(300)
 
     def consensus(self):
         if self.replies['yes'] > self.target / 2:
             self.blockchain.addBlock(self.newBlock)
+            print('Block Added')
             message = json.dumps({'type': 'current block', 'index': str(self.newBlock.getIndex()), 'previous hash': self.newBlock.getPreviousHash(), 'timestamp': self.newBlock.getTimestamp(), 'contract': self.newBlock.getContract(), 'hash': self.newBlock.getHash()})
             for peer in self.peers:
                 self.peerCons[peer].transport.write(str.encode(message + '\r\n'))
@@ -158,7 +176,7 @@ class P2PServerFactory(Factory):
         elif self.replies['yes'] + self.replies['no'] != self.target:
             self.resendNewBlock()
         else:
-            print('READY')
+            print('state: READY')
             self.state = 'READY'
 
     def sendNewBlock(self):
