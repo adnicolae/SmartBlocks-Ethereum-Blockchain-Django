@@ -11,9 +11,11 @@ class SendBlockProtocol(Protocol):
     def connectionMade(self):
         message = json.dumps({'type': 'new contract', 'contract': self.factory.block})
         self.transport.write(str.encode(message + '\r\n'))
+        self.transport.loseConnection()
 
     def connectionLost(self, reason):
-        reactor.stop()
+        reactor.crash()
+        print(reactor.running)
 
 
 class SendBlockFactory(ClientFactory):
@@ -25,6 +27,7 @@ class SendBlockFactory(ClientFactory):
 
 def send(contract):
     reactor.connectTCP('localhost', 64444, SendBlockFactory(contract))
-    reactor.run()
+    if not reactor.running:
+        reactor.run(installSignalHandlers=0)
 
 
