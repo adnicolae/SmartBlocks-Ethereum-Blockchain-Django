@@ -18,7 +18,7 @@ from .forms import ChangeUsernameForm, SearchOfferForm, SearchOfferFormAdvance
 
 from django.forms.models import model_to_dict
 
-from .matcher import match, parseString, strToListOfBounds
+from .matcher import match as matchBounds, parseString, strToListOfBounds
 
 from webapp.solidity import SolidityHelper
 
@@ -127,7 +127,12 @@ def assetDetails(request, asset_id):
 	return render(request, 'webapp/assetDetails.html', {'asset': asset, 'form': form})
 
 @login_required
-def sign(request, offer_id, price=-1, quantity=-1):
+def sign(request, offer_id):
+    sign_contract(request, offer_id)
+
+    return redirect('webapp:myOffers')
+
+def sign_contract(request, offer_id, price=-1, quantity=-1):
     offer = Offer.objects.get(pk=offer_id)
     user = User.objects.get(pk=request.user.id)
     if(offer is None):
@@ -141,7 +146,7 @@ def sign(request, offer_id, price=-1, quantity=-1):
     if quantity == -1:
         offer.stock = float(offer.stock) - float(request.POST.get('post_quantity'))
     else:
-        offer.stock = float(offer.stock) - quantity
+        offer.stock = float(offer.stock) - float(quantity)
     offer.save()
     
     old_offer = Offer.objects.get(pk=offer_id)
@@ -184,8 +189,6 @@ def sign(request, offer_id, price=-1, quantity=-1):
     decrypted_message = decrypt.decrypt(cipher_text_buyer)
     print(decrypted_message)
     '''
-
-    return redirect('webapp:myOffers')
 
 def login_view(request):
     if request.method == "POST":
@@ -304,49 +307,58 @@ def createOffer(request):
 
             #try to find match
             if form.cleaned_data.get('contract_type') == 'Buy':
-                potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name)
+                potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=offer.asset_name,buyer=None)
             else:
-                potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name)
+                potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=offer.asset_name, seller=None)
 
-            flag = False
-            best_match = (0, 0)
-            best_match_id = -1
-            if priority is 'buyer':
-                best_match = (2**31, 0)
+            match_list = []
             for m in potential_matches:
                 m_bounds = strToListOfBounds(m.bounds)
-                out = match(clause.bounds, m_bounds, priority)                
+                out = matchBounds(clause.bounds, m_bounds, priority)
                 if out is not None:
+                    #contracts match
                     quant = min(offer.stock, m.stock)
-                    flag = True
-                    if priority is 'buyer':
-                        if best_match[0] > out[0] : #if cheaper, buy
-                            best_match = out
-                            best_match_id = m.id
-                        elif best_match[0] == out[0] and best_match[1] < quant : #same price, more quantity
-                            best_match = out
-                            best_match_id = m.id
+                    quant = max(0, quant)
+                    if quant == 0 :
+                        continue
+                    if len(match_list) == 0:
+                        match_list.append((out, m.id))
+                    elif priority is 'buyer':
+                        index = 0
+                        for match in match_list:                            
+                            if (match[0][0] > out[0]) or (match[0][0] == out[0] and match[0][1] < quant): 
+                                match_list.insert(index, ((out[0], quant), m.id))
+                                break
+                            index += 1
+                        match_list.append((out, m.id))
                     else:
-                        if best_match[0] < out[0] : #if more expensive, buy
-                            best_match = out
-                            best_match_id = m.id
-                        elif best_match[0] == out[0] and best_match[1] < quant : #same price, more quantity
-                            best_match = out
-                            best_match_id = m.id
+                        index = 0
+                        for match in match_list:                            
+                            if (match[0][0] < out[0]) or (match[0][0] == out[0] and match[0][1] < quant): 
+                                match_list.insert(index, ((out[0], quant), m.id))
+                                break
+                            index += 1
+                        match_list.append((out, m.id))
                     
-            offer.stock = float(offer.stock) - best_match[1]
+            if len(match_list) > 0:
+                toastHTML = '<span>A match was automatically found!</span>'
+                messages.success(request, toastHTML)
+                index = 0
+                while(offer.stock > 0 and index < len(match_list)):
+                    match = match_list[index]
+                    print("matching with offer id {}, price {} quant {}".format(match[1], match[0][0], match[0][1]))
+                    quant = min(offer.stock, match[0][1])
+                    offer.stock = float(offer.stock) - quant
+                    sign_contract(request, match[1], match[0][0], quant)
+                    index += 1
+           
             if(offer.stock > 0):
                 offer.save()
-            print(offer)
-            if flag :
-                toastHTML = '<span>Offer created successfully!<br>A match was automatically found!</span>'
+                detailsURL = reverse('webapp:details', args=[offer.id])
+                toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action waves-effect waves-light white-text" href="{}">View</a>'.format(detailsURL);
+            
                 messages.success(request, toastHTML)
-                return sign(request, best_match_id, best_match[0], best_match[1])
-            
-            detailsURL = reverse('webapp:details', args=[offer.id])
-            toastHTML = '<span>Offer created successfully!</span><a class="btn-flat toast-action waves-effect waves-light white-text" href="{}">View</a>'.format(detailsURL);
-            
-            messages.success(request, toastHTML)
+
             return redirect('webapp:myOffers')
     else:
         form = OfferCreationForm()
@@ -414,17 +426,17 @@ def searchOffers(request):
 			contract_type = form.cleaned_data['contract_type']
 			offers = []
 			if contract_type == 'Buy':
-				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name)
+				potential_matches = Offer.objects.filter(contract_type='Sell',asset_name=name, seller=None)
 				priority = 'seller'
 			else:
-				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name)
+				potential_matches = Offer.objects.filter(contract_type='Buy',asset_name=name, buyer=None)
 				priority = 'buyer'
 			
 			searchCondition = "p ="+ str(price) + "AND q =" + str(quantity)
 			clause = parseString(searchCondition)
 			for m in potential_matches:
 				pot_mat_clause = parseString(m.completion_condition)
-				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				out = matchBounds(clause.bounds, pot_mat_clause.bounds, priority)
 				if out is not None:
 					offers.append(m)
 					
@@ -460,7 +472,7 @@ def searchOffersAdvanced(request):
 			clause = parseString(searchCondition)			
 			for m in potential_matches:
 				pot_mat_clause = parseString(m.completion_condition)
-				out = match(clause.bounds, pot_mat_clause.bounds, priority)
+				out = matchBounds(clause.bounds, pot_mat_clause.bounds, priority)
 				if out is not None:
 					offers.append(m)
 					
