@@ -11,14 +11,10 @@ from Crypto.PublicKey import RSA
 
 import codecs
 
-# from sys import stdout
-# from twisted.logger import globalLogBeginner, textFileLogObserver, Logger
-# globalLogBeginner.beginLoggingTo([textFileLogObserver(stdout)])
-# logger = Logger()
-
 class P2PServerProtocol(LineReceiver):
 
     def connectionMade(self):
+        # self.peer is IP address of peer
         self.peer = self.transport.getPeer().host
         self.blockSender = False
         print('Connected to peer', self.peer)
@@ -31,6 +27,9 @@ class P2PServerProtocol(LineReceiver):
             print(self.factory.peers)
 
     def lineReceived(self, line):
+        # Called whenever a line/message is received
+        # message is decoded from bytes to string, type of message is checked
+        # call appropriate function depending on type
         message = json.loads(line.decode())
         if message['type'] == 'hello':
             self.handleHello()
@@ -82,7 +81,6 @@ class P2PServerProtocol(LineReceiver):
             self.factory.target -= 1
             if self.factory.replies['yes'] + self.factory.replies['no'] == self.factory.target:
                 self.factory.resend.cancel()
-                print('Cancelled')
                 self.factory.consensus()
 
     def sendNewPeer(self, peer):
@@ -118,7 +116,7 @@ class P2PServerProtocol(LineReceiver):
     def sendNewBlock(self, newBlock):
         message = json.dumps({'type': 'new block', 'index': str(newBlock.getIndex()), 'previous hash': newBlock.getPreviousHash(), 'timestamp': newBlock.getTimestamp(), 'contract': newBlock.getContract(), 'hash': newBlock.getHash()})
         self.factory.peerCons[self.factory.lastPeer].transport.write(str.encode(message + '\r\n'))
-        self.factory.resend = reactor.callLater(10, self.factory.resendNewBlock)
+        self.factory.resend = reactor.callLater(60, self.factory.resendNewBlock)
 
     def handleVote(self, message):
         if message['index'] != str(self.factory.newBlock.getIndex()) or self.factory.state != 'CONSENSUS':
@@ -182,12 +180,12 @@ class P2PServerFactory(Factory):
     def sendNewBlock(self):
         message = json.dumps({'type': 'new block', 'index': str(self.newBlock.getIndex()), 'previous hash': self.newBlock.getPreviousHash(), 'timestamp': self.newBlock.getTimestamp(), 'contract': self.newBlock.getContract(), 'hash': self.newBlock.getHash()})
         self.peerCons[self.lastPeer].transport.write(str.encode(message + '\r\n'))
-        self.resend = reactor.callLater(10, self.resendNewBlock)
+        self.resend = reactor.callLater(60, self.resendNewBlock)
 
     def resendNewBlock(self):
         self.resetConsensus()
         self.sendNewBlock()
-        print('Resent')
+        print('Block Resent')
 
     def resetConsensus(self):
         self.replies['yes'] = 0

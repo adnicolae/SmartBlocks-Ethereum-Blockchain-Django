@@ -6,11 +6,6 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint, TCP4ClientEndpoint, connectProtocol
 from twisted.internet import reactor, task
 
-# from sys import stdout
-# from twisted.logger import globalLogBeginner, textFileLogObserver, Logger
-# globalLogBeginner.beginLoggingTo([textFileLogObserver(stdout)])
-# logger = Logger()
-
 class P2PServerProtocol(LineReceiver):
 
     def connectionMade(self):

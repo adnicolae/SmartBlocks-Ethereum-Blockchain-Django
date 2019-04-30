@@ -13,7 +13,7 @@ class SendBlockProtocol(Protocol):
         self.transport.write(str.encode(message + '\r\n'))
 
     def connectionLost(self, reason):
-        reactor.stop()
+        #reactor.stop()
 
 
 class SendBlockFactory(ClientFactory):
@@ -25,6 +25,7 @@ class SendBlockFactory(ClientFactory):
 
 def send(contract):
     reactor.connectTCP('localhost', 64444, SendBlockFactory(contract))
-    reactor.run()
+    if not reactor.running:
+        reactor.run()
 
 
