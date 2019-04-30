@@ -91,9 +91,9 @@ class P2PServerProtocol(LineReceiver):
         if self.factory.state == 'READY':
             currentBlock = self.factory.blockchain.getCurrentBlock()
             contract = message['contract']
-            buyer_cipher = codecs.escape_decode(message['buyer cipher'].encode('raw_unicode_escape'), 'hex')[0]
+            buyer_cipher = message['buyer cipher'].encode('raw_unicode_escape')
             buyer_key = message['buyer key'].encode()
-            seller_cipher = codecs.escape_decode(message['seller cipher'].encode('raw_unicode_escape'), 'hex')[0]
+            seller_cipher = message['seller cipher'].encode('raw_unicode_escape')
             seller_key = message['seller key'].encode()
             if self.checkMessage(buyer_key, buyer_cipher, contract) and self.checkMessage(seller_key, seller_cipher, contract):
                 self.factory.newBlock = Block(currentBlock.getIndex() + 1, currentBlock.getHash(), contract)

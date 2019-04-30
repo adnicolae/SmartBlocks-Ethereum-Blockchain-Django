@@ -26,8 +26,8 @@ class Offer(models.Model):
     buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="b",null=True)
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="s", null=True)
     asset_name = models.CharField(max_length=100)
-    condition_help = "Keywords: <span class='keyword'>AND</span>, <span class='keyword'>OR</span>.</br>Operations: <, >, =</br>Variables: <span class='variable'>price</span>, <span class='variable'>quantity</span></br>Use parentheses to group statements.</br></br>Example:</br> (<span class='variable'>price</span> < 100 <span class='keyword'>AND</span> (<span class='variable'>quantity</span> > 20 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 50)) </br><span class='keyword'>OR</span> (<span class='variable'>price</span> < 120 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 20)"
-    completion_condition = models.CharField(max_length=256, help_text=condition_help)
+
+    completion_condition = models.CharField(max_length=256)
     
     #format: priceLow,priceHigh,quantLow,quantHigh|...|...
     bounds = models.CharField(max_length=256, default="0,{},0,{}".format(str(2**31), str(2**31)))
@@ -140,7 +140,8 @@ class WalletForm(forms.ModelForm):
         fields = ['wallet_private_key', 'wallet_address']
         
 class OfferCreationForm(ModelForm):
-    completion_condition = forms.CharField(required=False)
+    condition_help = "Keywords: <span class='keyword'>AND</span>, <span class='keyword'>OR</span>.</br>Operations: <, >, =</br>Variables: <span class='variable'>price</span>, <span class='variable'>quantity</span></br>Use parentheses to group statements.</br></br>Example:</br> (<span class='variable'>price</span> < 100 <span class='keyword'>AND</span> (<span class='variable'>quantity</span> > 20 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 50)) </br><span class='keyword'>OR</span> (<span class='variable'>price</span> < 120 <span class='keyword'>AND</span> <span class='variable'>quantity</span> < 20)"
+    completion_condition = forms.CharField(required=False,  help_text=condition_help)
     class Meta:
         model = Offer
         fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency', 'stock']

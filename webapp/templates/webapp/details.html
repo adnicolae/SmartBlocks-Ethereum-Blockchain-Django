@@ -61,7 +61,10 @@ Total you receive: <span id="tp">Enter a quantity</span>
 </div>
 </div>
 <input type="hidden" name="post_price" id="price"></input>
-<input type="submit" class="btn waves-effect waves-light light-blue darken-4" disabled id="sign" value="Sign Contract"></input><br><br>
+<button class="btn waves-effect waves-light light-blue darken-4" type="submit" name="action" disabled id="sign" value="Sign Contract">Sign Contract
+</button>
+
+<br><br>
 </form>
 {%endif%}
 <a class="btn waves-effect waves-light light-blue darken-4" href="{% url 'webapp:offers' %}">Back to all offers</a><br>
@@ -86,7 +89,7 @@ function checkQuantity () {
     if(q == 0){
         document.getElementById("ppi").innerHTML = "Enter a quantity";
         document.getElementById("tp").innerHTML = "Enter a quantity";
-        document.getElementById("sign").classList.add("disabled");
+        document.getElementById("sign").disabled = true;
     }else{
         var bounds = "{{offer.bounds}}";
         var split_bounds = bounds.split("|");
