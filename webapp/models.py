@@ -140,6 +140,7 @@ class WalletForm(forms.ModelForm):
         fields = ['wallet_private_key', 'wallet_address']
         
 class OfferCreationForm(ModelForm):
+    completion_condition = forms.CharField(required=False)
     class Meta:
         model = Offer
         fields = ['contract_type', 'asset_name', 'completion_condition', 'unit', 'currency', 'stock']

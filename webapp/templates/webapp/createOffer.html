@@ -21,6 +21,70 @@
   <div class="container">
 {% csrf_token %}
 {% for field in form %}
+    {% if field.name == 'completion_condition' %}
+    <div class="row" style="  width: 80vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -40vw;
+  margin-right: -40vw;">
+        <div class="col s12">        
+          <ul class="tabs">
+            <div class="col s2"></div>
+            <li class="tab col s4"><a class="active" href="#test1" onclick="updateTabs(0)">Drag-and-drop</a></li>
+            <li class="tab col s4"><a href="#test2" onclick="updateTabs(1)">Text input</a></li>
+            <div class="col s2"></div>
+          </ul>
+        </div>
+        <div id="test1">
+        <br><br>
+        <center>
+        <p>
+        Drag clauses or expresisons into the dashed boxes to build your contract.
+        <p>
+        <div class="draggable">
+        <h5>
+        Expression:
+        </h5>
+        <img src="https://puu.sh/CRZaT.png" draggable="true" ondragstart="dragExpr(event)">
+        </div>
+        <div class="draggable">
+        <h5>
+        Clause:
+        </h5>
+        <img src="https://puu.sh/CS2To.png" draggable="true" ondragstart="dragClause(event)">
+        </div>
+
+        <br>
+        
+        <div id="wholeClause" class="clause">
+
+        </div>
+        <br>
+        <a class="btn" onclick="reset()">
+        Reset Clause
+        </a>
+        </center>
+        
+        
+        </div>
+        
+        <div id="test2" class="col s12">
+            <div class="col s3"></div>
+            <div class="col s6">
+            {% if field.help_text %}
+            <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+            <div class="input-field" id="{{field.auto_id}}_wrapper">  
+                {{ field }}
+                {{ field.label_tag }}
+                <span class="helper-text" data-error="wrong" data-success="right">{{field.errors}}<span>
+            </div>
+            </div>
+            <div class="col s3"></div>
+        </div>
+      </div>            
+    {%else%}
     {% if field.help_text %}
     <p class="help">{{ field.help_text|safe }}</p>
     {% endif %}
@@ -29,12 +93,15 @@
         {{ field.label_tag }}
         <span class="helper-text" data-error="wrong" data-success="right">{{field.errors}}<span>
     </div>
+    {%endif%}
 {% endfor %}
     <center>
    <button class="btn waves-effect waves-light light-blue darken-4" type="submit">Create Offer
     <i class="material-icons right">send</i>
   </button>
 </div>
+
+<input type="hidden" name="drag-and-drop-str" id="hidden-str" value="" />
 
 <script>
 document.getElementById("id_contract_type").onchange = function(){
@@ -44,6 +111,144 @@ document.getElementById("id_contract_type").onchange = function(){
         document.getElementById("id_stock").nextElementSibling.textContent = "Stock:";
     }
 };
+
+var exprHtml = '<select class="select-price-quantity" onchange="checkAllValid()"> <option value="price">Price</option><option value="quantity">Quantity</option> </select><select class="select-operator" onchange="checkAllValid()" ><option><</option><option>=</option><option>></option></select><input type="number" class="numInput" onchange="checkAllValid()" value=0>'
+
+var clauseHtml = '<div class="droppable" ondrop="drop(event)" ondragover="allowDrop(event)"><center><span class="placeholder">Drop expression<br>or clause here</span></center></div><select class="select-and-or" onchange="checkAllValid()"><option value="AND">AND</option><option value="OR">OR</option></select><div class="droppable" ondrop="drop(event)" ondragover="allowDrop(event)"><center><span class="placeholder">Drop expression<br>or clause here</span></center></div>'
+
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function dragExpr(ev) {
+  ev.dataTransfer.setData("text", exprHtml);
+  ev.dataTransfer.setData("class", "expr");
+}
+
+function dragClause(ev) {
+  ev.dataTransfer.setData("text", clauseHtml);
+  ev.dataTransfer.setData("class", "clause");
+}
+
+function drop(ev) {
+	if(ev.target.className != "placeholder"){
+    return false;
+  }
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  var className = ev.dataTransfer.getData("class");
+  if(className == "clause"){
+  	ev.target.parentElement.parentElement.classList.add("clause");
+  }else{
+  	ev.target.parentElement.parentElement.classList.add("expr");
+  }
+  ev.target.parentElement.parentElement.classList.remove("droppable");
+  ev.target.parentElement.parentElement.innerHTML=data;
+}
+
+function isValid(ele){
+  if(ele.className == "expr"){
+  	return checkValidExpr(ele);
+  }else if(ele.classList.contains("droppable")){
+    return false;
+  }else{
+  	return checkValidClause(ele);
+  }
+}
+
+function checkAllValid(){
+	var flag = isValid(document.getElementById("wholeClause"));
+    if(flag){
+        document.getElementById("hidden-str").value = dragAndDroptoStr();
+        return true;
+    }else{
+        document.getElementById("hidden-str").value = "";
+        return false;
+    }
+}
+
+function checkValidExpr(ele){
+	var val = ele.children[2].value;
+	if(val > 0){
+  	ele.style.borderBottom = "2px solid SpringGreen";
+    return true;
+  }else{
+  	ele.style.borderBottom = "2px solid red";
+    return false;
+  }
+}
+
+
+function checkValidClause(ele){
+  var flag = true;
+  if(!isValid(ele.children[0])){
+    flag = false;
+  }  
+  if(!isValid(ele.children[2])){
+    flag = false;
+  }
+  if(flag){
+    ele.style.borderBottom = "2px solid SpringGreen";
+    return true;
+  }
+  ele.style.borderBottom = "2px solid red";
+  return false;   
+}
+
+function reset(){	
+document.getElementById("wholeClause").innerHTML = clauseHtml;
+checkAllValid();
+}
+
+function printExpr(expr){
+	return "" +  expr.children[0].value + expr.children[1].value + expr.children[2].value;
+}
+
+function printClause(cl, str){
+  var str = ["","",""]
+	for(var i = 0; i < 3; i++){
+  	switch(cl.children[i].className){
+    	case "clause":
+      	str[i] = "(" + printClause(cl.children[i], str) +")";
+        break;
+      case "expr":
+        str[i] = printExpr(cl.children[i]);
+        break;
+      case "select-and-or":
+      	str[i] = cl.children[i].value;
+        break;
+    }
+  }
+  return "" + str[0] + str[1] + str[2];
+}
+
+function dragAndDroptoStr(){
+    var str = "";
+  str = printClause(document.getElementById("wholeClause"), str);
+  return str;
+}
+
+var oldValue = "";
+
+function updateTabs(tab){
+    if(tab==0){
+        document.getElementById("hidden-str").setAttribute("name","drag-and-drop-str");
+        document.getElementById("id_completion_condition").required = false;
+        oldValue = document.getElementById("id_completion_condition").value;
+    }else{
+        document.getElementById("hidden-str").setAttribute("name","ignore");
+        document.getElementById("id_completion_condition").required = true;
+    }
+
+}
+
+window.addEventListener('load', 
+  function() { 
+    reset();
+    document.getElementById("id_completion_condition").required = false;
+  }, false);
+
 </script>
 
 </form>

@@ -273,9 +273,19 @@ def createOffer(request):
     if request.method == "POST":
         form = OfferCreationForm(request.POST)
         if form.is_valid():
-        
             offer = form.save(commit=False)
             user = User.objects.get(id=request.user.id)
+        
+            contract_str = ""
+            if(request.POST.get("drag-and-drop-str","") is not None):
+                print("drag and drop used")
+                contract_str = request.POST.get("drag-and-drop-str","")
+            else:
+                print("text input used")
+                contract_str = form.cleaned_data['completion_condition']
+            
+            offer.completion_condition = contract_str
+                
 
             if form.cleaned_data.get('contract_type') == 'Sell' :
                 offer.seller = user
@@ -284,7 +294,7 @@ def createOffer(request):
                 offer.buyer = user
                 priority = 'buyer'
         
-            clause = parseString(form.cleaned_data.get('completion_condition'))
+            clause = parseString(contract_str)
             if clause is None:
                 form.add_error('completion_condition', 'Invalid clause')
                 return render(request, 'webapp/createOffer.html', {'form': form})

@@ -73,3 +73,73 @@ header > .card-panel {
     top: -10px;
     margin-left: 10px;
 }
+
+
+.clause {
+  border-bottom: 2px solid red;
+  display: inline-block;
+  margin: 10px;
+}
+
+.expr {
+  border-bottom: 2px solid red;
+  display: inline-block;
+  margin: 5px;
+}
+
+.numInput {  
+  max-width: 70px;
+  margin-bottom: 2px;
+  display: inline-block;
+}
+
+.draggable {
+  display: inline-block;
+  margin: 25px;
+  border: 1px solid;
+  padding: 10px;
+  vertical-align: top;
+  text-align: center;
+  height: 125px;
+  width: 330px;
+}
+
+.droppable {
+  border: 1px dashed;
+  min-width: 50px;
+  min-height: 30px;
+  display: inline-block;
+  padding: 4px;
+  margin-bottom: 5px;
+}
+
+.dropped {
+  display: inline-block;
+  padding: 4px;
+  margin-bottom: 5px;
+}
+
+.placeholder {
+  color: gray;
+  font-size: 15px;
+}
+
+.select-and-or{
+    display: inline-block;
+    width: 80px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.select-operator {
+    display: inline-block;
+    width: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.select-price-quantity {
+    display: inline-block;
+    width: 90px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
