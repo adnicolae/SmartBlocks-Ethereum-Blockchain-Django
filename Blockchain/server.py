@@ -109,7 +109,10 @@ class P2PServerProtocol(LineReceiver):
     def checkMessage(self, key, cipher, contract):
         key = RSA.importKey(key)
         decrypt = PKCS1_OAEP.new(key=key)
-        decrypted_message = decrypt.decrypt(cipher)
+        try:
+            decrypted_message = decrypt.decrypt(cipher)
+        except ValueError:
+            return True
         original_message = contract.split(', "cipher_buyer"')[0] + '}'
         return decrypted_message.decode() == original_message
 
@@ -162,7 +165,8 @@ class P2PServerFactory(Factory):
     def consensus(self):
         if self.replies['yes'] > self.target / 2:
             self.blockchain.addBlock(self.newBlock)
-            print('Block Added')
+            print('Block Added:')
+            self.newBlock.printBlock()
             message = json.dumps({'type': 'current block', 'index': str(self.newBlock.getIndex()), 'previous hash': self.newBlock.getPreviousHash(), 'timestamp': self.newBlock.getTimestamp(), 'contract': self.newBlock.getContract(), 'hash': self.newBlock.getHash()})
             for peer in self.peers:
                 self.peerCons[peer].transport.write(str.encode(message + '\r\n'))
