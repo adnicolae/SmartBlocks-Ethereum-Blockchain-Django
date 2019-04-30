@@ -17,10 +17,10 @@ class P2PServerProtocol(LineReceiver):
         # self.peer is IP address of peer
         self.peer = self.transport.getPeer().host
         self.blockSender = False
-        print('Connected to peer', self.peer)
+        print('Connected to', self.peer)
 
     def connectionLost(self, reason):
-        print('Disconnected from peer', self.peer)
+        print('Disconnected from', self.peer)
         if self.peer == self.factory.lastPeer and self.blockSender == False:
             self.factory.lastPeer = self.factory.peers.pop(self.peer)
             print('Current Peers:')
